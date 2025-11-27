@@ -4,7 +4,7 @@ import swaggerUi from 'swagger-ui-express';
 import mongoose from 'mongoose';
 import userRoutes from './routes/userRoutes';
 import imageRoutes from './routes/imageRoutes';
-import { swaggerDocument } from './swagger';
+import platSwagger from "./swagger/platformcloud.json" with { type: "json" };
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,7 +21,7 @@ mongoose.connect(MONGODB_URI)
     .catch((error) => console.error('MongoDB connection error:', error));
 
 // Swagger documentation
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(platSwagger));
 
 // Routes
 app.use('/user', userRoutes);
