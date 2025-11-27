@@ -4,6 +4,7 @@ import swaggerUi from 'swagger-ui-express';
 import mongoose from 'mongoose';
 import userRoutes from './routes/userRoutes';
 import imageRoutes from './routes/imageRoutes';
+import collectionRoutes from './routes/collectionRoutes';
 import platSwagger from "./swagger/platformcloud.json" with { type: "json" };
 
 const app = express();
@@ -26,6 +27,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(platSwagger));
 // Routes
 app.use('/user', userRoutes);
 app.use('/image', imageRoutes);
+app.use('/collection', collectionRoutes);
 
 // Basic route
 app.get('/', (req: Request, res: Response) => {

@@ -19,6 +19,8 @@ const CollectionSchema: Schema<CollectionDocument> = new Schema(
     }
 );
 
+CollectionSchema.index({ id: 1 }, { unique: true, partialFilterExpression: { id: { $exists: true } } });
+
 const CollectionModel: Model<CollectionDocument> = mongoose.model<CollectionDocument>('Collection', CollectionSchema);
 
 export default CollectionModel;
