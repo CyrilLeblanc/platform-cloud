@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import { DefaultApiFactory } from '../../../src/generated/api/api'
+import { Configuration } from '../../../src/generated/api/configuration'
 
 type Mode = 'login' | 'register'
 
@@ -25,61 +27,34 @@ export default function LoginForm() {
 
 		setLoading(true)
 		try {
-			const url = mode === 'login' ? '/api/auth/login' : '/api/auth/register'
-			const body: any = { email, password }
-			if (mode === 'register') body.name = name
+			// Use generated OpenAPI client (DefaultApiFactory)
+			const cfg = new Configuration({ basePath: import.meta.env.VITE_API_BASE_URL ?? undefined })
+			const api = DefaultApiFactory(cfg)
 
-			const res = await fetch(url, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(body),
-			})
+			// Call the appropriate endpoint using the generated client
+			const result = mode === 'login'
+				? await api.userLoginPost({ email: email as any, password: password as any } as any)
+				: await api.userRegisterPost({ email: email as any, password: password as any, username: name as any } as any)
 
-			const data = await res.json()
-			if (!res.ok) {
-				// Allow fallback to local mock if endpoint is not implemented
-				if (res.status === 404) throw new Error('not-found')
-				throw new Error(data?.error || 'Request failed')
-			}
-			// on success, store token if present
-			if (data?.token) {
-				localStorage.setItem('pc_token', data.token)
+			// The generated client returns an Axios response. Try to extract token if present.
+			const token = (result as any)?.data?.token || (result as any)?.data?.access_token
+			if (token) {
+				localStorage.setItem('pc_token', token)
 				setSuccess('Connecté — token enregistré en localStorage')
+			} else if ((result as any)?.status && (result as any).status >= 200 && (result as any).status < 300) {
+				setSuccess((mode === 'login') ? 'Login réussite' : 'Inscription réussie')
 			} else {
+				// no content / untyped response -> still consider it success
 				setSuccess((mode === 'login') ? 'Login réussite' : 'Inscription réussie')
 			}
 			// clean sensitive data
 			setPassword('')
 			setConfirm('')
 		} catch (e: any) {
-			// If server route not found or network error, fallback to local storage mock for dev
-			if (e.message === 'not-found' || e.message === 'Failed to fetch') {
-				try {
-					if (mode === 'register') {
-						const raw = localStorage.getItem('pc_users')
-						const users = raw ? JSON.parse(raw) : []
-						if (users.find((u: any) => u.email === email)) throw new Error('Un utilisateur avec cet e-mail existe déjà (local)')
-						const user = { id: Date.now(), name, email, password }
-						users.push(user)
-						localStorage.setItem('pc_users', JSON.stringify(users))
-						const token = 'local:' + btoa(email + ':' + Date.now())
-						localStorage.setItem('pc_token', token)
-						setSuccess("Inscription locale OK — token enregistré")
-					} else {
-						const raw = localStorage.getItem('pc_users')
-						const users = raw ? JSON.parse(raw) : []
-						const found = users.find((u: any) => u.email === email && u.password === password)
-						if (!found) throw new Error('Utilisateur introuvable (local) — vérifie email / mot de passe')
-						const token = 'local:' + btoa(email + ':' + Date.now())
-						localStorage.setItem('pc_token', token)
-						setSuccess('Login local OK — token enregistré')
-					}
-				} catch (err: any) {
-					setError(err.message || 'Erreur locale')
-				}
-			} else {
-				setError(e.message || 'Erreur inconnue')
-			}
+			// For any error returned by the API, display a classic server error message.
+			// Try to show a meaningful message coming from the backend (Axios error formats).
+			const serverMessage = e?.response?.data?.error || e?.response?.data?.message || e?.response?.data || e?.message
+			setError(serverMessage || 'Erreur serveur — vérifie les logs du serveur')
 		} finally {
 			setLoading(false)
 		}
