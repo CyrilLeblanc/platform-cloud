@@ -6,10 +6,14 @@ import userRoutes from './routes/userRoutes';
 import imageRoutes from './routes/imageRoutes';
 import collectionRoutes from './routes/collectionRoutes';
 import platSwagger from "./swagger/platformcloud.json" with { type: "json" };
+import cookieParser from 'cookie-parser';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://admin:password@localhost:27017/platform-cloud?authSource=admin';
+
+// Cookie parser middleware
+app.use(cookieParser());
 
 // Middleware
 app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:3000'] }));
