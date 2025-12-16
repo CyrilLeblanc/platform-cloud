@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { DefaultApiFactory } from '../../../src/generated/api/api'
 import { Configuration } from '../../../src/generated/api/configuration'
+import * as API from '../../../src/wrapper/wrapper';
+import { useAuth } from "../../../src/auth/authContext"
 
 type Mode = 'login' | 'register'
 
@@ -13,6 +15,21 @@ export default function LoginForm() {
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 	const [success, setSuccess] = useState<string | null>(null)
+
+	const { login } = useAuth()
+
+	const handleLogin = async (email: string, password: string) => {
+		const result = await API.loginUser(email, password);
+		login(result.data.token);
+		window.location.href = '/gallery';
+	};
+
+	const handleRegister = async (name: string, email: string, password: string) => {
+		const result = await API.registerUser(name, password, email);
+		handleLogin(email, password);
+		login(result.data.token);
+		window.location.href = '/gallery';
+	}
 
 	async function submit(e: React.FormEvent) {
 		e.preventDefault()
@@ -33,8 +50,8 @@ export default function LoginForm() {
 
 			// Call the appropriate endpoint using the generated client
 			const result = mode === 'login'
-				? await api.userLoginPost({ email: email as any, password: password as any } as any)
-				: await api.userRegisterPost({ email: email as any, password: password as any, username: name as any } as any)
+				? handleLogin(email, password)
+				: handleRegister(name, email, password)
 
 			// The generated client returns an Axios response. Try to extract token if present.
 			const token = (result as any)?.data?.token || (result as any)?.data?.access_token
@@ -43,6 +60,7 @@ export default function LoginForm() {
 				setSuccess('Connecté — token enregistré en localStorage')
 			} else if ((result as any)?.status && (result as any).status >= 200 && (result as any).status < 300) {
 				setSuccess((mode === 'login') ? 'Login réussite' : 'Inscription réussie')
+
 			} else {
 				// no content / untyped response -> still consider it success
 				setSuccess((mode === 'login') ? 'Login réussite' : 'Inscription réussie')

@@ -1,8 +1,11 @@
 import React from 'react'
 import { Link } from 'react-router'
+import { useAuth } from "src/auth/authContext";
 
 export default function Header() {
 	const [open, setOpen] = React.useState(false)
+	const { user, isAuthenticated, logout } = useAuth();
+	console.log("HEADER AUTH", isAuthenticated);
 
 	return (
 		<header className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white left-0 right-0 z-40 shadow">
@@ -16,10 +19,10 @@ export default function Header() {
 					</div>
 
 					<nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-						<Link to="/" className="hover:text-slate-200">Accueil</Link>
 						<Link to="/gallery" className="hover:text-slate-200">Galerie</Link>
-						<Link to="/dashboard" className="hover:text-slate-200">Dashboard</Link>
-						<Link to="/login" className="px-3 py-1 border border-transparent rounded bg-white/10 hover:bg-white/20">Se connecter</Link>
+						{!isAuthenticated ? ( <Link to="/login" className="px-3 py-1 border border-transparent rounded bg-white/10 hover:bg-white/20">Se connecter</Link> ) : (
+							<button onClick={logout} className="px-3 py-1 border border-transparent rounded bg-white/10 hover:bg-white/20">Se déconnecter</button>
+						)}
 					</nav>
 
 					<div className="md:hidden">
@@ -30,18 +33,6 @@ export default function Header() {
 						</button>
 					</div>
 				</div>
-
-				{/* Mobile menu */}
-				{open && (
-					<div className="md:hidden py-2 border-t border-white/5">
-						<div className="flex flex-col gap-2 py-2 text-sm">
-							<Link to="/" onClick={() => setOpen(false)} className="px-2 py-2 hover:bg-white/5 rounded">Accueil</Link>
-							<Link to="/gallery" onClick={() => setOpen(false)} className="px-2 py-2 hover:bg-white/5 rounded">Galerie</Link>
-							<Link to="/dashboard" onClick={() => setOpen(false)} className="px-2 py-2 hover:bg-white/5 rounded">Dashboard</Link>
-							<Link to="/login" onClick={() => setOpen(false)} className="px-2 py-2 border border-white/10 rounded text-center">Se connecter</Link>
-						</div>
-					</div>
-				)}
 			</div>
 		</header>
 	)

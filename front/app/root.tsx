@@ -6,7 +6,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
-
+import { AuthProvider } from "src/auth/authContext";
 import type { Route } from "./+types/root";
 import "./app.css";
 import Header from './components/Header/header'
@@ -24,6 +24,20 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+import { useAuth } from "../src/auth/authContext";
+
+export function AuthDebug() {
+  const auth = useAuth()
+
+  console.log("AUTH STATE", auth)
+
+  return (
+    <pre style={{ fontSize: 12 }}>
+      {JSON.stringify(auth, null, 2)}
+    </pre>
+  )
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -33,12 +47,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body>
-        <Header />
-        <div>{children}</div>
-        <ScrollRestoration />
-        <Scripts />
-      </body>
+      <AuthProvider>
+        {/* <AuthDebug /> */}
+        <body>
+          <Header />
+          <div>{children}</div>
+          <ScrollRestoration />
+          <Scripts />
+        </body>
+      </AuthProvider>
+
     </html>
   );
 }
