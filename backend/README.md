@@ -5,8 +5,9 @@
 To start the server, run the following command:
 
 ```bash
-docker-compose up --build -d
-npm start
+docker compose up --build -d
+npm install
+npm run dev
 ```
 
 You may need to create the database in MongoDB before starting the node part.
