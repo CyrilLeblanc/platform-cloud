@@ -1,19 +1,20 @@
 import { Response } from 'express';
 import ImageModel from '../model/Image';
 import { AuthRequest } from '../middleware/auth';
-import UserModel from '../model/User';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 
 export const createImage = async (req: AuthRequest, res: Response) => {
-    // #swagger.tags = ['Image']
-    // #swagger.summary = 'Create an image placeholder (metadata)'
-    // #swagger.parameters['body'] = {
-    //   in: 'body',
-    //   description: 'Image metadata to create',
-    //   schema: { title: 'My photo title' }
-    // }
+    /*
+        #swagger.tags = ['Image']
+        #swagger.summary = 'Create an image placeholder (metadata)'
+        #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Image metadata to create',
+            schema: { title: 'My photo title' }
+        }
+     */
 
     try {
         const { title } = req.body;
@@ -96,11 +97,13 @@ export const upload = multer({
 });
 
 export const uploadImage = async (req: AuthRequest, res: Response) => {
-    // #swagger.tags = ['Image']
-    // #swagger.summary = 'Upload binary file for an image ID (multipart)'
-    // #swagger.consumes = ['multipart/form-data']
-    // #swagger.parameters['id'] = { in: 'path', description: 'Image id', required: true, type: 'integer', example: 1 }
-    // #swagger.parameters['file'] = { in: 'formData', type: 'file', description: 'Image file to upload' }
+    /*
+        #swagger.tags = ['Image']
+        #swagger.summary = 'Upload binary file for an image ID (multipart)'
+        #swagger.consumes = ['multipart/form-data']
+        #swagger.parameters['id'] = { in: 'path', description: 'Image id', required: true, type: 'integer', example: 1 }
+        #swagger.parameters['file'] = { in: 'formData', type: 'file', description: 'Image file to upload' }
+     */
 
     try {
         // Get ID from params
@@ -173,8 +176,10 @@ export const uploadImage = async (req: AuthRequest, res: Response) => {
 };
 
 export const getMyImages = async (req: AuthRequest, res: Response) => {
-    // #swagger.tags = ['Image']
-    // #swagger.summary = 'Get images for the authenticated user'
+    /*
+        #swagger.tags = ['Image']
+        #swagger.summary = 'Get images for the authenticated user'
+     */
 
     try {
         const userId = req.userId;
@@ -210,9 +215,11 @@ export const getMyImages = async (req: AuthRequest, res: Response) => {
 };
 
 export const getImageById = async (req: AuthRequest, res: Response) => {
-    // #swagger.tags = ['Image']
-    // #swagger.summary = 'Get image details by ID'
-    // #swagger.parameters['id'] = { in: 'path', description: 'Image id', required: true, type: 'integer', example: 1 }
+    /*
+        #swagger.tags = ['Image']
+        #swagger.summary = 'Get image details by ID'
+        #swagger.parameters['id'] = { in: 'path', description: 'Image id', required: true, type: 'integer', example: 1 }
+     */
 
     try {
         const imageId = parseInt(req.params.id);
@@ -245,3 +252,59 @@ export const getImageById = async (req: AuthRequest, res: Response) => {
         });
     }
 };
+
+export const deleteImage = async (req: AuthRequest, res: Response) => {
+    /*
+        #swagger.tags = ['Image']
+        #swagger.summary = 'Delete an image by ID'
+        #swagger.parameters['id'] = { in: 'path', description: 'Image id', required: true, type: 'integer', example: 1 }
+     */
+
+    try {
+        const imageId = parseInt(req.params.id);
+        const userId = req.userId;
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                result: 'Unauthorized'
+            });
+        }
+
+        const image = await ImageModel.findOne({id: imageId});
+        if (!image) {
+            return res.status(404).json({
+                success: false,
+                result: 'Image not found'
+            });
+        }
+
+        // Check ownership
+        if (image.user_id !== userId) {
+            return res.status(403).json({
+                success: false,
+                result: 'Forbidden: You do not own this image'
+            });
+        }
+
+        // Delete image file
+        const filePath = path.join(uploadDir, image.filename);
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+
+        // Delete image document
+        await ImageModel.deleteOne({id: imageId});
+
+        return res.status(200).json({
+            success: true,
+            result: 'Image deleted successfully'
+        });
+    } catch (error) {
+        console.error('Delete image error:', error);
+        return res.status(500).json({
+            success: false,
+            result: 'Server error deleting image'
+        });
+    }
+}

@@ -11,34 +11,30 @@ interface CreateCollectionBody {
 interface UpdateCollectionBody {
     name?: string;
     description?: string;
+    color?: string;
 }
 
 // Créer une collection
-export const createCollection = async (req: Request<unknown, unknown, CreateCollectionBody>, res: Response) => {
-    // #swagger.tags = ['Collection']
-    // #swagger.summary = 'Create a new collection'
-    // #swagger.parameters['body'] = {
-    //   in: 'body',
-    //   description: 'Collection payload',
-    //   schema: { name: 'My collection', description: 'Optional description' }
-    // }
+export const createCollection = async (req: Request, res: Response) => {
+    /*
+        #swagger.tags = ['Collection']
+        #swagger.summary = 'Create a new collection'
+        #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Collection payload',
+            schema: { name: 'My collection', description: 'Optional description', color: 'Color in hex' }
+        }
+    */
 
     try {
-        const { id, name, description } = req.body;
+        const { name, description, color } = req.body;
 
         if (!name) {
             return res.status(400).json({ message: 'Name is required' });
         }
 
-        let collectionId = id;
-        // Exemple d’auto-incrément très simple (à remplacer par un vrai compteur si besoin)
-        if (!collectionId) {
-            const last = await CollectionModel.findOne().sort({ id: -1 }).lean();
-            collectionId = last ? last.id + 1 : 1;
-        }
-
         const collection = await CollectionModel.create({
-            id: collectionId,
+            color: color,
             name,
             description,
         });
@@ -52,8 +48,10 @@ export const createCollection = async (req: Request<unknown, unknown, CreateColl
 
 // Récupérer toutes les collections (pour l’instant, aucune notion d’owner)
 export const getMyCollections = async (req: Request, res: Response) => {
-    // #swagger.tags = ['Collection']
-    // #swagger.summary = 'List collections visible to the caller'
+    /*
+        #swagger.tags = ['Collection']
+        #swagger.summary = 'List collections visible to the caller'
+     */
 
     try {
         const collections = await CollectionModel.find().sort({ created_at: -1 }).lean();
@@ -65,16 +63,18 @@ export const getMyCollections = async (req: Request, res: Response) => {
 };
 
 // Récupérer une collection par id
-export const getCollectionById = async (req: Request<{ id: string }>, res: Response) => {
-    // #swagger.tags = ['Collection']
-    // #swagger.summary = 'Get a collection by its numeric ID'
-    // #swagger.parameters['id'] = { 
-    //      in: 'path', 
-    //      description: 'Collection id', 
-    //      required: true, 
-    //      type: 'integer', 
-    //      example: 1 
-    // }
+export const getCollectionById = async (req: Request, res: Response) => {
+    /*
+        #swagger.tags = ['Collection']
+        #swagger.summary = 'Get a collection by its numeric ID'
+        #swagger.parameters['id'] = {
+            in: 'path',
+            description: 'Collection id',
+            required: true,
+            type: 'integer',
+            example: 1
+        }
+     */
 
     try {
         const numericId = Number(req.params.id);
@@ -96,13 +96,25 @@ export const getCollectionById = async (req: Request<{ id: string }>, res: Respo
 
 // Mettre à jour une collection
 export const updateCollection = async (
-    req: Request<{ id: string }, unknown, UpdateCollectionBody>,
+    req: Request,
     res: Response
 ) => {
-    // #swagger.tags = ['Collection']
-    // #swagger.summary = 'Update a collection by ID'
-    // #swagger.parameters['id'] = { in: 'path', description: 'Collection id', required: true, type: 'integer', example: 1 }
-
+    /*
+        #swagger.tags = ['Collection']
+        #swagger.summary = 'Update a collection by ID'
+        #swagger.parameters['id'] = {
+            in: 'path',
+            description: 'Collection id',
+            required: true,
+            type: 'integer',
+            example: 1
+        }
+        #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Collection payload',
+            schema: { name: 'My collection', description: 'Optional description', color: 'Color in hex' }
+        }
+    */
     try {
         const numericId = Number(req.params.id);
         if (Number.isNaN(numericId)) {
@@ -112,6 +124,7 @@ export const updateCollection = async (
         const updatePayload: UpdateCollectionBody = {};
         if (typeof req.body.name === 'string') updatePayload.name = req.body.name;
         if (typeof req.body.description === 'string') updatePayload.description = req.body.description;
+        if (typeof req.body.color === 'string') updatePayload.color = req.body.color;
 
         const updated = await CollectionModel.findOneAndUpdate(
             { id: numericId },
@@ -131,10 +144,12 @@ export const updateCollection = async (
 };
 
 // Supprimer une collection
-export const deleteCollection = async (req: Request<{ id: string }>, res: Response) => {
-    // #swagger.tags = ['Collection']
-    // #swagger.summary = 'Delete a collection by ID'
-    // #swagger.parameters['id'] = { in: 'path', description: 'Collection id', required: true, type: 'integer', example: 1 }
+export const deleteCollection = async (req: Request, res: Response) => {
+    /*
+        #swagger.tags = ['Collection']
+        #swagger.summary = 'Delete a collection by ID'
+        #swagger.parameters['id'] = { in: 'path', description: 'Collection id', required: true, type: 'integer', example: 1 }
+     */
 
     try {
         const numericId = Number(req.params.id);
