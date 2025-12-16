@@ -1,11 +1,8 @@
 import React from 'react'
 import { Link } from 'react-router'
-import { useAuth } from "src/auth/authContext";
 
 export default function Header() {
 	const [open, setOpen] = React.useState(false)
-	const { user, isAuthenticated, logout } = useAuth();
-	console.log("HEADER AUTH", isAuthenticated);
 
 	return (
 		<header className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white left-0 right-0 z-40 shadow">
@@ -20,9 +17,7 @@ export default function Header() {
 
 					<nav className="hidden md:flex items-center gap-6 text-sm font-medium">
 						<Link to="/gallery" className="hover:text-slate-200">Galerie</Link>
-						{!isAuthenticated ? ( <Link to="/login" className="px-3 py-1 border border-transparent rounded bg-white/10 hover:bg-white/20">Se connecter</Link> ) : (
-							<button onClick={logout} className="px-3 py-1 border border-transparent rounded bg-white/10 hover:bg-white/20">Se déconnecter</button>
-						)}
+						<Link to="/login" className="px-3 py-1 border border-transparent rounded bg-white/10 hover:bg-white/20">Se connecter</Link>
 					</nav>
 
 					<div className="md:hidden">

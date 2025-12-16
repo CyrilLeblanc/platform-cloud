@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { DefaultApiFactory } from '../../../src/generated/api/api'
 import { Configuration } from '../../../src/generated/api/configuration'
 import * as API from '../../../src/wrapper/wrapper';
-import { useAuth } from "../../../src/auth/authContext"
+import { useNavigate } from "react-router";
 
 type Mode = 'login' | 'register'
 
@@ -15,20 +15,19 @@ export default function LoginForm() {
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 	const [success, setSuccess] = useState<string | null>(null)
-
-	const { login } = useAuth()
+	const navigate = useNavigate()
 
 	const handleLogin = async (email: string, password: string) => {
 		const result = await API.loginUser(email, password);
-		login(result.data.token);
-		window.location.href = '/gallery';
+		navigate("/gallery", { replace: true })
+		// window.location.href = '/gallery';
 	};
 
 	const handleRegister = async (name: string, email: string, password: string) => {
 		const result = await API.registerUser(name, password, email);
-		handleLogin(email, password);
-		login(result.data.token);
-		window.location.href = '/gallery';
+		handleLogin(email, password);		
+		navigate("/gallery", { replace: true })
+		// window.location.href = '/gallery';
 	}
 
 	async function submit(e: React.FormEvent) {
