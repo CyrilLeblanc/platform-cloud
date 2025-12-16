@@ -59,11 +59,7 @@ export default function LoginForm() {
 				localStorage.setItem('pc_token', token)
 				setSuccess('Connecté — token enregistré en localStorage')
 			} else if ((result as any)?.status && (result as any).status >= 200 && (result as any).status < 300) {
-				setSuccess((mode === 'login') ? 'Login réussite' : 'Inscription réussie')
-
 			} else {
-				// no content / untyped response -> still consider it success
-				setSuccess((mode === 'login') ? 'Login réussite' : 'Inscription réussie')
 			}
 			// clean sensitive data
 			setPassword('')
