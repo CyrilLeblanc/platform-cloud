@@ -12,7 +12,7 @@ const doc = {
         bearerAuth: {
             type: "apiKey",
             in: "header",
-            name: "Authorization",
+            name: "authorization",
             description: "Utilisez le format: Bearer {votre_token_JWT}"
         },
     },
