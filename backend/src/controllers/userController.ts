@@ -115,6 +115,7 @@ export const login = async (req: AuthRequest, res: Response) => {
         return res.status(200).json({
             success: true,
             result: "bravo t'es connecté !!!",
+            userId: user.id,
             token
         });
     } catch (error) {
