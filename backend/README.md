@@ -5,7 +5,7 @@
 To start the server, run the following command:
 
 ```bash
-docker-compose up --build -d
+docker compose up --build -d
 npm install
 npm run dev
 ```
