@@ -1,5 +1,18 @@
 # API Endpoints
 
+## Starting the server
+
+To start the server, run the following command:
+
+```bash
+docker-compose up --build -d
+npm start
+```
+
+You may need to create the database in MongoDB before starting the node part.
+If you started the node part without creating the database, you will need to stop it and create the database.
+This can be done via the Express GUI.
+
 ## Authentication
 
 ### POST /user/login
@@ -63,7 +76,7 @@ Crée une entrée image dans la base de données. Le fichier doit être envoyé 
 }
 ```
 
-### POST /image/<id>/upload
+### POST /image/\<id\>/upload
 Envoie le fichier image (pas de body JSON, envoi en multipart/form-data).
 
 **Response:**
