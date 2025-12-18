@@ -321,7 +321,7 @@ export const deleteImage = async (req: AuthRequest, res: Response) => {
         }
 
         // Check ownership
-        if (image.user._id !== user._id) {
+        if (String(image.user._id) !== String(user._id)) {
             return res.status(403).json({
                 success: false,
                 result: 'Forbidden: You do not own this image'
