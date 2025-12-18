@@ -1,15 +1,15 @@
 import request from 'supertest';
 import express from 'express';
-import collectionRoutes from '../routes/collectionRoutes';
+import collectionRoutes from '../routes/albumRoutes';
 import userRoutes from '../routes/userRoutes';
-import CollectionModel from '../model/Collection';
+import AlbumModel from '../model/Album';
 
 const app = express();
 app.use(express.json());
 app.use('/user', userRoutes);
 app.use('/collection', collectionRoutes);
 
-describe('Collection Endpoints', () => {
+describe('Album Endpoints', () => {
   let authToken: string;
 
   beforeEach(async () => {
@@ -38,13 +38,13 @@ describe('Collection Endpoints', () => {
         .post('/collection')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          name: 'My Collection',
+          name: 'My Album',
           description: 'Test description'
         });
 
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id');
-      expect(response.body.name).toBe('My Collection');
+      expect(response.body.name).toBe('My Album');
       expect(response.body.description).toBe('Test description');
     });
 
@@ -53,14 +53,14 @@ describe('Collection Endpoints', () => {
         .post('/collection')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          name: 'Collection 1'
+          name: 'Album 1'
         });
 
       const response2 = await request(app)
         .post('/collection')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          name: 'Collection 2'
+          name: 'Album 2'
         });
 
       expect(response1.body.id).toBe(1);
@@ -83,7 +83,7 @@ describe('Collection Endpoints', () => {
       const response = await request(app)
         .post('/collection')
         .send({
-          name: 'My Collection'
+          name: 'My Album'
         });
 
       expect(response.status).toBe(401);
@@ -94,11 +94,11 @@ describe('Collection Endpoints', () => {
         .post('/collection')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          name: 'Collection without description'
+          name: 'Album without description'
         });
 
       expect(response.status).toBe(201);
-      expect(response.body.name).toBe('Collection without description');
+      expect(response.body.name).toBe('Album without description');
     });
   });
 
@@ -108,12 +108,12 @@ describe('Collection Endpoints', () => {
       await request(app)
         .post('/collection')
         .set('Authorization', `Bearer ${authToken}`)
-        .send({ name: 'Collection 1', description: 'First' });
+        .send({ name: 'Album 1', description: 'First' });
 
       await request(app)
         .post('/collection')
         .set('Authorization', `Bearer ${authToken}`)
-        .send({ name: 'Collection 2', description: 'Second' });
+        .send({ name: 'Album 2', description: 'Second' });
     });
 
     it('should get all collections', async () => {
@@ -124,8 +124,8 @@ describe('Collection Endpoints', () => {
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.body.length).toBe(2);
-      expect(response.body[0].name).toBe('Collection 2'); // Most recent first
-      expect(response.body[1].name).toBe('Collection 1');
+      expect(response.body[0].name).toBe('Album 2'); // Most recent first
+      expect(response.body[1].name).toBe('Album 1');
     });
 
     it('should fail without authentication', async () => {
@@ -137,7 +137,7 @@ describe('Collection Endpoints', () => {
 
     it('should return empty array when no collections exist', async () => {
       // Clear all collections
-      await CollectionModel.deleteMany({});
+      await AlbumModel.deleteMany({});
 
       const response = await request(app)
         .get('/collection')
@@ -156,7 +156,7 @@ describe('Collection Endpoints', () => {
       const createResponse = await request(app)
         .post('/collection')
         .set('Authorization', `Bearer ${authToken}`)
-        .send({ name: 'Test Collection', description: 'Test desc' });
+        .send({ name: 'Test Album', description: 'Test desc' });
 
       collectionId = createResponse.body.id;
     });
@@ -168,7 +168,7 @@ describe('Collection Endpoints', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.id).toBe(collectionId);
-      expect(response.body.name).toBe('Test Collection');
+      expect(response.body.name).toBe('Test Album');
       expect(response.body.description).toBe('Test desc');
     });
 
@@ -279,7 +279,7 @@ describe('Collection Endpoints', () => {
       const createResponse = await request(app)
         .post('/collection')
         .set('Authorization', `Bearer ${authToken}`)
-        .send({ name: 'Collection to delete' });
+        .send({ name: 'Album to delete' });
 
       collectionId = createResponse.body.id;
     });
@@ -292,7 +292,7 @@ describe('Collection Endpoints', () => {
       expect(response.status).toBe(204);
 
       // Verify collection was deleted
-      const collection = await CollectionModel.findOne({ id: collectionId });
+      const collection = await AlbumModel.findOne({ id: collectionId });
       expect(collection).toBeNull();
     });
 

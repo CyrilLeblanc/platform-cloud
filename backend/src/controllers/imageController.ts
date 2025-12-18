@@ -14,12 +14,12 @@ export const createImage = async (req: AuthRequest, res: Response) => {
         #swagger.parameters['body'] = {
             in: 'body',
             description: 'Image metadata to create',
-            schema: { title: 'My photo title' }
+            schema: { title: 'My photo title', album_id: '1' }
         }
      */
 
     try {
-        const { title } = req.body;
+        const { title, album_id } = req.body;
         const { user } = req;
 
         if (!user) {
@@ -42,7 +42,8 @@ export const createImage = async (req: AuthRequest, res: Response) => {
             title: title,
             mime_type: 'image/png', // Default, will be updated on upload
             shot_date: new Date(),
-            user: user._id // Store the owner
+            user: user._id, // Store the owner
+            album: album_id || null
         });
 
         await image.save();

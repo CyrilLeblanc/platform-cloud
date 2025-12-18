@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-export interface CollectionDocument extends Document {
+export interface AlbumDocument extends Document {
     name: string
     description?: string
     color?: string
@@ -9,7 +9,7 @@ export interface CollectionDocument extends Document {
     user: mongoose.Types.ObjectId
 }
 
-const CollectionSchema: Schema<CollectionDocument> = new Schema(
+const AlbumSchema: Schema<AlbumDocument> = new Schema(
     {
         name: { type: String, required: true },
         description: { type: String },
@@ -21,6 +21,6 @@ const CollectionSchema: Schema<CollectionDocument> = new Schema(
     }
 );
 
-const CollectionModel: Model<CollectionDocument> = mongoose.model<CollectionDocument>('Collection', CollectionSchema);
+const AlbumModel: Model<AlbumDocument> = mongoose.model<AlbumDocument>('Album', AlbumSchema);
 
-export default CollectionModel;
+export default AlbumModel;
