@@ -144,7 +144,6 @@ export const uploadImage = async (req: AuthRequest, res: Response) => {
         }
 
         // Check ownership
-        console.log(image.user._id, user._id);
         if (String(image.user._id) !== String(user._id)) {
             // Clean up uploaded file if not owner
             if (req.file.path && fs.existsSync(req.file.path)) {
