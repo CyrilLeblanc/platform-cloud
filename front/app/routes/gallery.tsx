@@ -19,7 +19,10 @@ type ImageItem = {
 export function meta() {
   return [
     { title: "Galerie" },
-    { name: "description", content: "Galerie d'images - ajouter et visualiser des images" },
+    {
+      name: "description",
+      content: "Galerie d'images - ajouter et visualiser des images",
+    },
   ];
 }
 
@@ -27,10 +30,23 @@ function Gallery() {
   const [images, setImages] = useState<ImageItem[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
+  const [selectedCollectionId, setSelectedCollectionId] = useState<
+    string | null
+  >(null);
   const [showNewCollection, setShowNewCollection] = useState(false);
   const [newCollName, setNewCollName] = useState("");
   const [newCollColor, setNewCollColor] = useState("#1e293b");
+
+  // ===== CONSTANTES DE SÉCURITÉ =====
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+  const ALLOWED_TYPES = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+  ];
+  const ALLOWED_EXTENSIONS = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
 
   const colors = [
     "#3B82F6",
@@ -67,32 +83,149 @@ function Gallery() {
     return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
   }
 
-  function handleFiles(files: FileList | null) {
+  function validateFile(file: File): { valid: boolean; error?: string } {
+    const extension = file.name.toLowerCase().match(/\.[^.]*$/)?.[0];
+    if (!extension || !ALLOWED_EXTENSIONS.includes(extension)) {
+      return {
+        valid: false,
+        error: `Extension non autorisée: ${extension || "aucune"}`,
+      };
+    }
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return {
+        valid: false,
+        error: `Type de fichier non autorisé: ${file.type}`,
+      };
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      return {
+        valid: false,
+        error: `Fichier trop volumineux: ${(file.size / 1024 / 1024).toFixed(2)}MB (max: 5MB)`,
+      };
+    }
+
+    if (file.size === 0) {
+      return { valid: false, error: "Fichier vide" };
+    }
+
+    return { valid: true };
+  }
+
+  async function validateImageContent(file: File): Promise<boolean> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        if (
+          img.width > 0 &&
+          img.height > 0 &&
+          img.width <= 10000 &&
+          img.height <= 10000
+        ) {
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve(false);
+      };
+
+      img.src = url;
+    });
+  }
+
+  function sanitizeFilename(filename: string): string {
+    const nameWithoutExt = filename.replace(/\.[^.]+$/, "");
+
+    return nameWithoutExt.replace(/[^a-zA-Z0-9\s._-]/g, "_").slice(0, 100); 
+  }
+
+  async function handleFiles(files: FileList | null) {
     if (!files) return;
-    const readers: Promise<ImageItem>[] = [];
+
+    const validFiles: File[] = [];
+    const errors: string[] = [];
+
+    // Validation de base (extension, type MIME, taille)
     for (const file of Array.from(files)) {
-      readers.push(
-        new Promise((res, rej) => {
-          const fr = new FileReader();
-          fr.onload = () =>
-            res({
-              id: makeId(),
-              src: String(fr.result),
-              title: "",
-              description: "",
-              collectionId: selectedCollectionId,
-            });
-          fr.onerror = () => rej(new Error("File read error"));
-          fr.readAsDataURL(file);
-        })
+      const validation = validateFile(file);
+      if (!validation.valid) {
+        errors.push(`${file.name}: ${validation.error}`);
+      } else {
+        validFiles.push(file);
+      }
+    }
+
+    if (errors.length > 0) {
+      alert(`⚠️ Fichiers rejetés:\n\n${errors.join("\n")}`);
+    }
+
+    if (validFiles.length === 0) return;
+
+    // Validation du contenu image
+    const contentValidation = await Promise.all(
+      validFiles.map(async (file) => ({
+        file,
+        valid: await validateImageContent(file),
+      }))
+    );
+
+    const validImageFiles = contentValidation
+      .filter((v) => v.valid)
+      .map((v) => v.file);
+
+    const invalidImages = contentValidation
+      .filter((v) => !v.valid)
+      .map((v) => v.file.name);
+
+    if (invalidImages.length > 0) {
+      alert(
+        `⚠️ Images invalides ou corrompues:\n\n${invalidImages.join("\n")}`
       );
     }
 
-    Promise.all(readers)
-      .then((items) => {
-        setImages((prev) => [...items, ...prev]);
-      })
-      .catch((err) => console.error(err));
+    if (validImageFiles.length === 0) return;
+
+    // Lecture des fichiers valides
+    const readers: Promise<ImageItem>[] = validImageFiles.map(
+      (file) =>
+        new Promise((res, rej) => {
+          const fr = new FileReader();
+          fr.onload = () => {
+            res({
+              id: makeId(),
+              src: String(fr.result),
+              title: sanitizeFilename(file.name),
+              description: "",
+              collectionId: selectedCollectionId,
+            });
+          };
+          fr.onerror = () => rej(new Error("Erreur de lecture"));
+          fr.readAsDataURL(file);
+        })
+    );
+
+    try {
+      const items = await Promise.all(readers);
+      setImages((prev) => [...items, ...prev]);
+
+      // Message de succès
+      if (validImageFiles.length > 0) {
+        console.log(
+          `✅ ${validImageFiles.length} image(s) ajoutée(s) avec succès`
+        );
+      }
+    } catch (err) {
+      console.error(err);
+      alert("❌ Erreur lors du chargement des images");
+    }
   }
 
   function onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -129,7 +262,9 @@ function Gallery() {
 
   function updateSelected(updater: (img: ImageItem) => ImageItem) {
     if (selectedIndex === null) return;
-    setImages((prev) => prev.map((it, idx) => (idx === selectedIndex ? updater(it) : it)));
+    setImages((prev) =>
+      prev.map((it, idx) => (idx === selectedIndex ? updater(it) : it))
+    );
   }
 
   function truncate(s: string, n = 60) {
@@ -139,7 +274,11 @@ function Gallery() {
 
   function createCollection() {
     if (!newCollName.trim()) return;
-    const coll: Collection = { id: makeId(), name: newCollName, color: newCollColor };
+    const coll: Collection = {
+      id: makeId(),
+      name: newCollName,
+      color: newCollColor,
+    };
     setCollections((prev) => [...prev, coll]);
     setNewCollName("");
     setNewCollColor("#3B82F6");
@@ -149,7 +288,9 @@ function Gallery() {
   function deleteCollection(collId: string) {
     setCollections((prev) => prev.filter((c) => c.id !== collId));
     setImages((prev) =>
-      prev.map((img) => (img.collectionId === collId ? { ...img, collectionId: null } : img))
+      prev.map((img) =>
+        img.collectionId === collId ? { ...img, collectionId: null } : img
+      )
     );
     if (selectedCollectionId === collId) setSelectedCollectionId(null);
   }
@@ -168,7 +309,9 @@ function Gallery() {
 
   function moveImageToCollection(imgIdx: number, collId: string | null) {
     setImages((prev) =>
-      prev.map((img, idx) => (idx === imgIdx ? { ...img, collectionId: collId } : img))
+      prev.map((img, idx) =>
+        idx === imgIdx ? { ...img, collectionId: collId } : img
+      )
     );
   }
 
@@ -193,7 +336,9 @@ function Gallery() {
         {/* Collections list */}
         <div className="mb-4 space-y-1">
           {collections.map((coll) => {
-            const count = images.filter((img) => img.collectionId === coll.id).length;
+            const count = images.filter(
+              (img) => img.collectionId === coll.id
+            ).length;
             return (
               <div
                 key={coll.id}
@@ -278,11 +423,18 @@ function Gallery() {
         <div className="mb-4 flex items-center justify-between">
           <h1 className="text-2xl font-semibold text-slate-900">
             {selectedCollectionId
-              ? collections.find((c) => c.id === selectedCollectionId)?.name || "Collection"
+              ? collections.find((c) => c.id === selectedCollectionId)?.name ||
+                "Collection"
               : "Galerie"}
           </h1>
           <label className="inline-flex items-center gap-2 cursor-pointer bg-slate-800 text-white px-3 py-1 rounded-md hover:bg-black transition">
-            <input type="file" accept="image/*" multiple onChange={onInputChange} className="hidden" />
+            <input
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+              multiple
+              onChange={onInputChange}
+              className="hidden"
+            />
             Ajouter des images
           </label>
         </div>
@@ -310,11 +462,17 @@ function Gallery() {
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-opacity" />
 
                   <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent text-white opacity-0 group-hover:opacity-100 transition">
-                    <div className="font-medium text-sm">{item.title || "(sans titre)"}</div>
+                    <div className="font-medium text-sm">
+                      {item.title || "(sans titre)"}
+                    </div>
                     {item.description ? (
-                      <div className="text-xs text-slate-200">{truncate(item.description, 80)}</div>
+                      <div className="text-xs text-slate-200">
+                        {truncate(item.description, 80)}
+                      </div>
                     ) : (
-                      <div className="text-xs text-slate-300">Cliquez pour éditer</div>
+                      <div className="text-xs text-slate-300">
+                        Cliquez pour éditer
+                      </div>
                     )}
                   </div>
 
@@ -361,14 +519,19 @@ function Gallery() {
                   >
                     Supprimer
                   </button>
-                  <button onClick={closeViewer} className="text-sm text-slate-600 hover:text-slate-900">
+                  <button
+                    onClick={closeViewer}
+                    className="text-sm text-slate-600 hover:text-slate-900"
+                  >
                     Fermer
                   </button>
                 </div>
               </div>
 
               <div className="mb-3">
-                <label className="block text-xs text-slate-600 mb-1">Titre</label>
+                <label className="block text-xs text-slate-600 mb-1">
+                  Titre
+                </label>
                 <input
                   className="w-full px-2 py-1 border border-slate-300 rounded bg-white text-slate-900"
                   value={images[selectedIndex].title}
@@ -379,18 +542,25 @@ function Gallery() {
               </div>
 
               <div className="mb-3">
-                <label className="block text-xs text-slate-600 mb-1">Description</label>
+                <label className="block text-xs text-slate-600 mb-1">
+                  Description
+                </label>
                 <textarea
                   className="w-full px-2 py-1 border border-slate-300 rounded bg-white text-slate-900 h-32"
                   value={images[selectedIndex].description}
                   onChange={(e) =>
-                    updateSelected((it) => ({ ...it, description: e.target.value }))
+                    updateSelected((it) => ({
+                      ...it,
+                      description: e.target.value,
+                    }))
                   }
                 />
               </div>
 
               <div className="mb-3">
-                <label className="block text-xs text-slate-600 mb-1">Collection</label>
+                <label className="block text-xs text-slate-600 mb-1">
+                  Collection
+                </label>
                 <select
                   className="w-full px-2 py-1 border border-slate-300 rounded bg-white text-slate-900 text-sm"
                   value={images[selectedIndex].collectionId || ""}
@@ -410,7 +580,9 @@ function Gallery() {
                 </select>
               </div>
 
-              <div className="text-sm text-slate-500">Appuyez sur "Fermer" pour enregistrer.</div>
+              <div className="text-sm text-slate-500">
+                Appuyez sur "Fermer" pour enregistrer.
+              </div>
             </aside>
           </div>
         </div>
