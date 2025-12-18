@@ -424,6 +424,7 @@ export const AlbumApiFactory = function (configuration?: Configuration, basePath
          * @throws {RequiredError}
          */
         albumPost(authorization?: string, cookie?: string, body?: AlbumPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            console.log("AlbumApiFactory.albumPost called with body:", body);
             return localVarFp.albumPost(authorization, cookie, body, options).then((request) => request(axios, basePath));
         },
     };

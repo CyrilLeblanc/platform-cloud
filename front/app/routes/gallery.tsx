@@ -77,6 +77,7 @@ function Gallery() {
     (async () => {
       try {
         const res: any = await listCollections();
+        console.log("listCollections response:", res);
         if (!mounted) return;
         const payload = res && typeof res === "object" && "data" in res ? res.data : res;
         if (Array.isArray(payload)) {

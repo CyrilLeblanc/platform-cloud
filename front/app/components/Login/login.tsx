@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import { DefaultApiFactory } from '../../../src/generated/api/api'
 import { Configuration } from '../../../src/generated/api/configuration'
 import * as API from '../../../src/wrapper/wrapper';
 import { useNavigate, useLocation } from "react-router";
 import { useAuth } from '../../context/AuthContext'
+import { UserApiFactory } from 'src/generated/api';
 
 type Mode = 'login' | 'register'
 
@@ -49,9 +49,9 @@ export default function LoginForm() {
 
 		setLoading(true)
 		try {
-			// Use generated OpenAPI client (DefaultApiFactory)
+			// Use generated OpenAPI client (UserApiFactory)
 			const cfg = new Configuration({ basePath: import.meta.env.VITE_API_BASE_URL ?? undefined })
-			const api = DefaultApiFactory(cfg)
+			const api = UserApiFactory(cfg)
 
 			// Call the appropriate endpoint using the generated client
 			const result = mode === 'login'
