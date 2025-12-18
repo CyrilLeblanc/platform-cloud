@@ -86,6 +86,7 @@ export const getMyAlbums = async (req: AuthRequest, res: Response) => {
             description: album.description,
             color: album.color,
             created_at: album.created_at,
+            qty: await ImageModel.countDocuments({ album: album._id })
         })));
 
         return res.status(200).json(result);
