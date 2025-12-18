@@ -14,12 +14,12 @@ export const createImage = async (req: AuthRequest, res: Response) => {
         #swagger.parameters['body'] = {
             in: 'body',
             description: 'Image metadata to create',
-            schema: { title: 'My photo title', album_id: '1' }
+            schema: { title: 'My photo title', description: 'A simple description', album_id: '1' }
         }
      */
 
     try {
-        const { title, album_id } = req.body;
+        const { title, description, album_id } = req.body;
         const { user } = req;
 
         if (!user) {
@@ -40,6 +40,7 @@ export const createImage = async (req: AuthRequest, res: Response) => {
         const image = new ImageModel({
             filename: title,
             title: title,
+            description: description,
             mime_type: 'image/png', // Default, will be updated on upload
             shot_date: new Date(),
             user: user._id, // Store the owner
@@ -103,7 +104,7 @@ export const uploadImage = async (req: AuthRequest, res: Response) => {
         #swagger.tags = ['Image']
         #swagger.summary = 'Upload binary file for an image ID (multipart)'
         #swagger.consumes = ['multipart/form-data']
-        #swagger.parameters['id'] = { in: 'path', description: 'Image id', required: true, type: 'text', example: 1 }
+        #swagger.parameters['id'] = { in: 'path', description: 'Image id', required: true, type: 'string', example: '1' }
         #swagger.parameters['file'] = { in: 'formData', type: 'file', description: 'Image file to upload' }
      */
 
