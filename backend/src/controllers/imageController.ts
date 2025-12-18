@@ -232,7 +232,8 @@ export const getMyImages = async (req: AuthRequest, res: Response) => {
             mime_type: img.mime_type,
             created_at: img.created_at,
             shot_date: img.shot_date,
-            storage_type: img.blob_url ? 'azure' : 'local'
+            storage_type: img.blob_url ? 'azure' : 'local',
+            album: img.album || null
         }));
 
         return res.status(200).json(formattedImages);
