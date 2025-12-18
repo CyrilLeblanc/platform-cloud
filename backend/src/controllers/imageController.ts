@@ -18,9 +18,9 @@ export const createImage = async (req: AuthRequest, res: Response) => {
 
     try {
         const { title } = req.body;
-        const userId = req.userId;
+        const { user } = req;
 
-        if (!userId) {
+        if (!user) {
             return res.status(401).json({
                 success: false,
                 result: 'Unauthorized'
@@ -34,18 +34,13 @@ export const createImage = async (req: AuthRequest, res: Response) => {
             });
         }
 
-        // Generate unique ID
-        const lastImage = await ImageModel.findOne().sort({ id: -1 });
-        const newId = lastImage ? lastImage.id + 1 : 1;
-
         // Create image entry (file will be uploaded later)
         const image = new ImageModel({
-            id: newId,
             filename: title,
             title: title,
             mime_type: 'image/png', // Default, will be updated on upload
             shot_date: new Date(),
-            user_id: userId // Store the owner
+            user_id: user._id // Store the owner
         });
 
         await image.save();
@@ -53,7 +48,7 @@ export const createImage = async (req: AuthRequest, res: Response) => {
         return res.status(201).json({
             success: true,
             content: {
-                id: image.id
+                id: image._id
             }
         });
     } catch (error) {
@@ -107,12 +102,12 @@ export const uploadImage = async (req: AuthRequest, res: Response) => {
 
     try {
         // Get ID from params
-        const imageId = parseInt(req.params.id);
+        const {id} = req.params;
         
         // Get userId from auth middleware (via headers)
-        const userId = req.userId;
+        const {user} = req;
 
-        if (!userId) {
+        if (!user) {
             return res.status(401).json({
                 success: false,
                 result: 'Unauthorized'
@@ -128,7 +123,7 @@ export const uploadImage = async (req: AuthRequest, res: Response) => {
         }
 
         // Find image
-        const image = await ImageModel.findOne({ id: imageId });
+        const image = await ImageModel.findOne({ _id: id });
         if (!image) {
             // Clean up uploaded file if image not found
             fs.unlinkSync(req.file.path);
@@ -139,7 +134,7 @@ export const uploadImage = async (req: AuthRequest, res: Response) => {
         }
 
         // Check ownership
-        if (image.user_id !== userId) {
+        if (image.user !== user._id) {
             // Clean up uploaded file if not owner
             fs.unlinkSync(req.file.path);
             return res.status(403).json({
@@ -157,7 +152,7 @@ export const uploadImage = async (req: AuthRequest, res: Response) => {
         return res.status(200).json({
             success: true,
             content: {
-                id: image.id,
+                id: image._id,
                 filename: image.filename,
                 mime_type: image.mime_type
             }
@@ -182,9 +177,9 @@ export const getMyImages = async (req: AuthRequest, res: Response) => {
      */
 
     try {
-        const userId = req.userId;
+        const { user } = req;
 
-        if (!userId) {
+        if (!user) {
             return res.status(401).json({
                 success: false,
                 result: 'Unauthorized'
@@ -192,10 +187,10 @@ export const getMyImages = async (req: AuthRequest, res: Response) => {
         }
 
         // For now, return all images (you'd filter by user_id in production)
-        const images = await ImageModel.find({});
+        const images = await ImageModel.find({user: user._id});
 
         const formattedImages = images.map(img => ({
-            id: img.id,
+            id: img._id,
             url: `http://localhost:3000/uploads/${img.filename}`,
             title: img.title,
             description: img.description,
@@ -222,9 +217,18 @@ export const getImageById = async (req: AuthRequest, res: Response) => {
      */
 
     try {
-        const imageId = parseInt(req.params.id);
+        const { user } = req;
 
-        const image = await ImageModel.findOne({ id: imageId });
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                result: 'Unauthorized'
+            });
+        }
+
+        const { id } = req.params;
+
+        const image = await ImageModel.findOne({ _id: id, user: user._id });
         if (!image) {
             return res.status(404).json({
                 success: false,
@@ -235,7 +239,7 @@ export const getImageById = async (req: AuthRequest, res: Response) => {
         return res.status(200).json({
             success: true,
             content: {
-                id: image.id,
+                id: image._id,
                 url: `http://localhost:3000/uploads/${image.filename}`,
                 title: image.title,
                 description: image.description,
@@ -261,17 +265,17 @@ export const deleteImage = async (req: AuthRequest, res: Response) => {
      */
 
     try {
-        const imageId = parseInt(req.params.id);
-        const userId = req.userId;
+        const { id } = req.params;
+        const { user } = req;
 
-        if (!userId) {
+        if (!user) {
             return res.status(401).json({
                 success: false,
                 result: 'Unauthorized'
             });
         }
 
-        const image = await ImageModel.findOne({id: imageId});
+        const image = await ImageModel.findOne({_id: id});
         if (!image) {
             return res.status(404).json({
                 success: false,
@@ -280,7 +284,7 @@ export const deleteImage = async (req: AuthRequest, res: Response) => {
         }
 
         // Check ownership
-        if (image.user_id !== userId) {
+        if (image.user._id !== user._id) {
             return res.status(403).json({
                 success: false,
                 result: 'Forbidden: You do not own this image'
@@ -294,7 +298,7 @@ export const deleteImage = async (req: AuthRequest, res: Response) => {
         }
 
         // Delete image document
-        await ImageModel.deleteOne({id: imageId});
+        await ImageModel.deleteOne({_id: id, user: user._id});
 
         return res.status(200).json({
             success: true,

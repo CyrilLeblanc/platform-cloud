@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import CollectionModel from '../model/Collection';
+import { AuthRequest } from '../middleware/auth';
 
 // Typed payloads pour plus de clarté
 interface CreateCollectionBody {
-    id?: number; // optionnel, on peut autogénérer
     name: string;
     description?: string;
 }
@@ -15,7 +15,7 @@ interface UpdateCollectionBody {
 }
 
 // Créer une collection
-export const createCollection = async (req: Request, res: Response) => {
+export const createCollection = async (req: AuthRequest, res: Response) => {
     /*
         #swagger.tags = ['Collection']
         #swagger.summary = 'Create a new collection'
@@ -29,6 +29,12 @@ export const createCollection = async (req: Request, res: Response) => {
     try {
         const { name, description, color } = req.body;
 
+        const { user } = req;
+
+        if (!user) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+        
         if (!name) {
             return res.status(400).json({ message: 'Name is required' });
         }
@@ -37,6 +43,7 @@ export const createCollection = async (req: Request, res: Response) => {
             color: color,
             name,
             description,
+            user: user
         });
 
         return res.status(201).json(collection);
@@ -47,14 +54,18 @@ export const createCollection = async (req: Request, res: Response) => {
 };
 
 // Récupérer toutes les collections (pour l’instant, aucune notion d’owner)
-export const getMyCollections = async (req: Request, res: Response) => {
+export const getMyCollections = async (req: AuthRequest, res: Response) => {
     /*
         #swagger.tags = ['Collection']
         #swagger.summary = 'List collections visible to the caller'
      */
 
+    if (!req.user) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+        
     try {
-        const collections = await CollectionModel.find().sort({ created_at: -1 }).lean();
+        const collections = await CollectionModel.find({user: req.user._id}).sort({ created_at: -1 }).lean();
         return res.status(200).json(collections);
     } catch (error) {
         console.error('Error fetching collections', error);
@@ -63,7 +74,7 @@ export const getMyCollections = async (req: Request, res: Response) => {
 };
 
 // Récupérer une collection par id
-export const getCollectionById = async (req: Request, res: Response) => {
+export const getCollectionById = async (req: AuthRequest, res: Response) => {
     /*
         #swagger.tags = ['Collection']
         #swagger.summary = 'Get a collection by its numeric ID'
@@ -77,12 +88,16 @@ export const getCollectionById = async (req: Request, res: Response) => {
      */
 
     try {
-        const numericId = Number(req.params.id);
-        if (Number.isNaN(numericId)) {
+        if (!req.user) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+        
+        const { id } = req.params;
+        if (Number.isNaN(id)) {
             return res.status(400).json({ message: 'Invalid collection id' });
         }
 
-        const collection = await CollectionModel.findOne({ id: numericId }).lean();
+        const collection = await CollectionModel.findOne({ _id: id, user: req.user._id }).lean();
         if (!collection) {
             return res.status(404).json({ message: 'Collection not found' });
         }
@@ -96,7 +111,7 @@ export const getCollectionById = async (req: Request, res: Response) => {
 
 // Mettre à jour une collection
 export const updateCollection = async (
-    req: Request,
+    req: AuthRequest,
     res: Response
 ) => {
     /*
@@ -116,8 +131,13 @@ export const updateCollection = async (
         }
     */
     try {
-        const numericId = Number(req.params.id);
-        if (Number.isNaN(numericId)) {
+        const { user } = req;
+        if (!user) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+        
+        const { id } = req.params;
+        if (Number.isNaN(id)) {
             return res.status(400).json({ message: 'Invalid collection id' });
         }
 
@@ -127,7 +147,7 @@ export const updateCollection = async (
         if (typeof req.body.color === 'string') updatePayload.color = req.body.color;
 
         const updated = await CollectionModel.findOneAndUpdate(
-            { id: numericId },
+            { _id: id, user: user._id },
             { $set: updatePayload },
             { new: true }
         );
@@ -144,7 +164,7 @@ export const updateCollection = async (
 };
 
 // Supprimer une collection
-export const deleteCollection = async (req: Request, res: Response) => {
+export const deleteCollection = async (req: AuthRequest, res: Response) => {
     /*
         #swagger.tags = ['Collection']
         #swagger.summary = 'Delete a collection by ID'
@@ -152,12 +172,18 @@ export const deleteCollection = async (req: Request, res: Response) => {
      */
 
     try {
-        const numericId = Number(req.params.id);
-        if (Number.isNaN(numericId)) {
+        const { id } = req.params;
+        const { user } = req;
+        
+        if (!user) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+
+        if (Number.isNaN(id)) {
             return res.status(400).json({ message: 'Invalid collection id' });
         }
 
-        const deleted = await CollectionModel.findOneAndDelete({ id: numericId });
+        const deleted = await CollectionModel.findOneAndDelete({ _id: id, user: user._id });
         if (!deleted) {
             return res.status(404).json({ message: 'Collection not found' });
         }
