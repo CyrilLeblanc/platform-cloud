@@ -5,9 +5,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**email** | **object** |  | [optional] [default to undefined]
-**password** | **object** |  | [optional] [default to undefined]
-**username** | **object** |  | [optional] [default to undefined]
+**email** | **string** |  | [optional] [default to undefined]
+**password** | **string** |  | [optional] [default to undefined]
+**username** | **string** |  | [optional] [default to undefined]
 
 ## Example
 

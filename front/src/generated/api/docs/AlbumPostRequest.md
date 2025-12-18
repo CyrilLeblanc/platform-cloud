@@ -1,23 +1,23 @@
-# ImageCreatePostRequest
+# AlbumPostRequest
 
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**title** | **string** |  | [optional] [default to undefined]
+**name** | **string** |  | [optional] [default to undefined]
 **description** | **string** |  | [optional] [default to undefined]
-**album_id** | **string** |  | [optional] [default to undefined]
+**color** | **string** |  | [optional] [default to undefined]
 
 ## Example
 
 ```typescript
-import { ImageCreatePostRequest } from './api';
+import { AlbumPostRequest } from './api';
 
-const instance: ImageCreatePostRequest = {
-    title,
+const instance: AlbumPostRequest = {
+    name,
     description,
-    album_id,
+    color,
 };
 ```
 

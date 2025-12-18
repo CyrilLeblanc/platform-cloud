@@ -23,37 +23,41 @@ import type { RequestArgs } from './base';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerMap } from './base';
 
-export interface CollectionPostRequest {
-    'id'?: object;
-    'name'?: object;
-    'description'?: object;
+export interface AlbumPostRequest {
+    'name'?: string;
+    'description'?: string;
+    'color'?: string;
 }
 export interface ImageCreatePostRequest {
-    'title'?: object;
+    'title'?: string;
+    'description'?: string;
+    'album_id'?: string;
 }
 export interface UserLoginPostRequest {
-    'email'?: object;
-    'password'?: object;
+    'email'?: string;
+    'password'?: string;
 }
 export interface UserRegisterPostRequest {
-    'email'?: object;
-    'password'?: object;
-    'username'?: object;
+    'email'?: string;
+    'password'?: string;
+    'username'?: string;
 }
 
 /**
- * DefaultApi - axios parameter creator
+ * AlbumApi - axios parameter creator
  */
-export const DefaultApiAxiosParamCreator = function (configuration?: Configuration) {
+export const AlbumApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
          * 
+         * @summary List albums visible to the caller
          * @param {string} [authorization] 
+         * @param {string} [cookie] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        collectionGet: async (authorization?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/collection/`;
+        albumGet: async (authorization?: string, cookie?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/album/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -66,12 +70,15 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
             // authentication bearerAuth required
-            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+            await setApiKeyToObject(localVarHeaderParameter, "authorization", configuration)
 
 
     
             if (authorization != null) {
                 localVarHeaderParameter['authorization'] = String(authorization);
+            }
+            if (cookie != null) {
+                localVarHeaderParameter['cookie'] = String(cookie);
             }
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -84,15 +91,17 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @param {string} id 
+         * @summary Delete a album by ID
+         * @param {number} id Album id
          * @param {string} [authorization] 
+         * @param {string} [cookie] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        collectionIdDelete: async (id: string, authorization?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        albumIdDelete: async (id: number, authorization?: string, cookie?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
-            assertParamExists('collectionIdDelete', 'id', id)
-            const localVarPath = `/collection/{id}`
+            assertParamExists('albumIdDelete', 'id', id)
+            const localVarPath = `/album/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -106,12 +115,15 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
             // authentication bearerAuth required
-            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+            await setApiKeyToObject(localVarHeaderParameter, "authorization", configuration)
 
 
     
             if (authorization != null) {
                 localVarHeaderParameter['authorization'] = String(authorization);
+            }
+            if (cookie != null) {
+                localVarHeaderParameter['cookie'] = String(cookie);
             }
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -124,15 +136,17 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @param {string} id 
+         * @summary Get a album by its numeric ID
+         * @param {string} id Album id
          * @param {string} [authorization] 
+         * @param {string} [cookie] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        collectionIdGet: async (id: string, authorization?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        albumIdGet: async (id: string, authorization?: string, cookie?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
-            assertParamExists('collectionIdGet', 'id', id)
-            const localVarPath = `/collection/{id}`
+            assertParamExists('albumIdGet', 'id', id)
+            const localVarPath = `/album/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -146,12 +160,15 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
             // authentication bearerAuth required
-            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+            await setApiKeyToObject(localVarHeaderParameter, "authorization", configuration)
 
 
     
             if (authorization != null) {
                 localVarHeaderParameter['authorization'] = String(authorization);
+            }
+            if (cookie != null) {
+                localVarHeaderParameter['cookie'] = String(cookie);
             }
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -164,15 +181,18 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @param {string} id 
+         * @summary Update a album by ID
+         * @param {string} id Album id
          * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {AlbumPostRequest} [body] Album payload
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        collectionIdPut: async (id: string, authorization?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        albumIdPut: async (id: string, authorization?: string, cookie?: string, body?: AlbumPostRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
-            assertParamExists('collectionIdPut', 'id', id)
-            const localVarPath = `/collection/{id}`
+            assertParamExists('albumIdPut', 'id', id)
+            const localVarPath = `/album/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -186,44 +206,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
             // authentication bearerAuth required
-            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
-
-
-    
-            if (authorization != null) {
-                localVarHeaderParameter['authorization'] = String(authorization);
-            }
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @param {string} [authorization] 
-         * @param {CollectionPostRequest} [body] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        collectionPost: async (authorization?: string, body?: CollectionPostRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/collection/`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerAuth required
-            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+            await setApiKeyToObject(localVarHeaderParameter, "authorization", configuration)
 
 
     
@@ -231,6 +214,9 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
             if (authorization != null) {
                 localVarHeaderParameter['authorization'] = String(authorization);
+            }
+            if (cookie != null) {
+                localVarHeaderParameter['cookie'] = String(cookie);
             }
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -244,11 +230,15 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
+         * @summary Create a new album
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {AlbumPostRequest} [body] Album payload
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        healthGet: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/health`;
+        albumPost: async (authorization?: string, cookie?: string, body?: AlbumPostRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/album/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -256,32 +246,276 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
             // authentication bearerAuth required
-            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+            await setApiKeyToObject(localVarHeaderParameter, "authorization", configuration)
 
 
     
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            if (authorization != null) {
+                localVarHeaderParameter['authorization'] = String(authorization);
+            }
+            if (cookie != null) {
+                localVarHeaderParameter['cookie'] = String(cookie);
+            }
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
+    }
+};
+
+/**
+ * AlbumApi - functional programming interface
+ */
+export const AlbumApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = AlbumApiAxiosParamCreator(configuration)
+    return {
         /**
          * 
+         * @summary List albums visible to the caller
          * @param {string} [authorization] 
-         * @param {ImageCreatePostRequest} [body] 
+         * @param {string} [cookie] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        imageCreatePost: async (authorization?: string, body?: ImageCreatePostRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        async albumGet(authorization?: string, cookie?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.albumGet(authorization, cookie, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AlbumApi.albumGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Delete a album by ID
+         * @param {number} id Album id
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async albumIdDelete(id: number, authorization?: string, cookie?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.albumIdDelete(id, authorization, cookie, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AlbumApi.albumIdDelete']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get a album by its numeric ID
+         * @param {string} id Album id
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async albumIdGet(id: string, authorization?: string, cookie?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.albumIdGet(id, authorization, cookie, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AlbumApi.albumIdGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Update a album by ID
+         * @param {string} id Album id
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {AlbumPostRequest} [body] Album payload
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async albumIdPut(id: string, authorization?: string, cookie?: string, body?: AlbumPostRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.albumIdPut(id, authorization, cookie, body, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AlbumApi.albumIdPut']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Create a new album
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {AlbumPostRequest} [body] Album payload
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async albumPost(authorization?: string, cookie?: string, body?: AlbumPostRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.albumPost(authorization, cookie, body, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AlbumApi.albumPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * AlbumApi - factory interface
+ */
+export const AlbumApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = AlbumApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary List albums visible to the caller
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        albumGet(authorization?: string, cookie?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.albumGet(authorization, cookie, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Delete a album by ID
+         * @param {number} id Album id
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        albumIdDelete(id: number, authorization?: string, cookie?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.albumIdDelete(id, authorization, cookie, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get a album by its numeric ID
+         * @param {string} id Album id
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        albumIdGet(id: string, authorization?: string, cookie?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.albumIdGet(id, authorization, cookie, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Update a album by ID
+         * @param {string} id Album id
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {AlbumPostRequest} [body] Album payload
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        albumIdPut(id: string, authorization?: string, cookie?: string, body?: AlbumPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.albumIdPut(id, authorization, cookie, body, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Create a new album
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {AlbumPostRequest} [body] Album payload
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        albumPost(authorization?: string, cookie?: string, body?: AlbumPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.albumPost(authorization, cookie, body, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * AlbumApi - object-oriented interface
+ */
+export class AlbumApi extends BaseAPI {
+    /**
+     * 
+     * @summary List albums visible to the caller
+     * @param {string} [authorization] 
+     * @param {string} [cookie] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public albumGet(authorization?: string, cookie?: string, options?: RawAxiosRequestConfig) {
+        return AlbumApiFp(this.configuration).albumGet(authorization, cookie, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Delete a album by ID
+     * @param {number} id Album id
+     * @param {string} [authorization] 
+     * @param {string} [cookie] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public albumIdDelete(id: number, authorization?: string, cookie?: string, options?: RawAxiosRequestConfig) {
+        return AlbumApiFp(this.configuration).albumIdDelete(id, authorization, cookie, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get a album by its numeric ID
+     * @param {string} id Album id
+     * @param {string} [authorization] 
+     * @param {string} [cookie] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public albumIdGet(id: string, authorization?: string, cookie?: string, options?: RawAxiosRequestConfig) {
+        return AlbumApiFp(this.configuration).albumIdGet(id, authorization, cookie, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Update a album by ID
+     * @param {string} id Album id
+     * @param {string} [authorization] 
+     * @param {string} [cookie] 
+     * @param {AlbumPostRequest} [body] Album payload
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public albumIdPut(id: string, authorization?: string, cookie?: string, body?: AlbumPostRequest, options?: RawAxiosRequestConfig) {
+        return AlbumApiFp(this.configuration).albumIdPut(id, authorization, cookie, body, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Create a new album
+     * @param {string} [authorization] 
+     * @param {string} [cookie] 
+     * @param {AlbumPostRequest} [body] Album payload
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public albumPost(authorization?: string, cookie?: string, body?: AlbumPostRequest, options?: RawAxiosRequestConfig) {
+        return AlbumApiFp(this.configuration).albumPost(authorization, cookie, body, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * ImageApi - axios parameter creator
+ */
+export const ImageApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Create an image placeholder (metadata)
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {ImageCreatePostRequest} [body] Image metadata to create
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        imageCreatePost: async (authorization?: string, cookie?: string, body?: ImageCreatePostRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/image/create`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -295,7 +529,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
             // authentication bearerAuth required
-            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+            await setApiKeyToObject(localVarHeaderParameter, "authorization", configuration)
 
 
     
@@ -303,6 +537,9 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
             if (authorization != null) {
                 localVarHeaderParameter['authorization'] = String(authorization);
+            }
+            if (cookie != null) {
+                localVarHeaderParameter['cookie'] = String(cookie);
             }
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -316,12 +553,59 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @param {string} id 
+         * @summary Delete an image by ID
+         * @param {string} id Image id
          * @param {string} [authorization] 
+         * @param {string} [cookie] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        imageIdGet: async (id: string, authorization?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        imageIdDelete: async (id: string, authorization?: string, cookie?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('imageIdDelete', 'id', id)
+            const localVarPath = `/image/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            await setApiKeyToObject(localVarHeaderParameter, "authorization", configuration)
+
+
+    
+            if (authorization != null) {
+                localVarHeaderParameter['authorization'] = String(authorization);
+            }
+            if (cookie != null) {
+                localVarHeaderParameter['cookie'] = String(cookie);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get image details by ID
+         * @param {string} id Image id
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        imageIdGet: async (id: string, authorization?: string, cookie?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
             assertParamExists('imageIdGet', 'id', id)
             const localVarPath = `/image/{id}`
@@ -338,12 +622,15 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
             // authentication bearerAuth required
-            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+            await setApiKeyToObject(localVarHeaderParameter, "authorization", configuration)
 
 
     
             if (authorization != null) {
                 localVarHeaderParameter['authorization'] = String(authorization);
+            }
+            if (cookie != null) {
+                localVarHeaderParameter['cookie'] = String(cookie);
             }
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -356,12 +643,15 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @param {string} id 
+         * @summary Upload binary file for an image ID (multipart)
+         * @param {string} id Image id
          * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {File} [file] Image file to upload
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        imageIdUploadPost: async (id: string, authorization?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        imageIdUploadPost: async (id: string, authorization?: string, cookie?: string, file?: File, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
             assertParamExists('imageIdUploadPost', 'id', id)
             const localVarPath = `/image/{id}/upload`
@@ -376,18 +666,29 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+            const localVarFormParams = new ((configuration && configuration.formDataCtor) || FormData)();
 
             // authentication bearerAuth required
-            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+            await setApiKeyToObject(localVarHeaderParameter, "authorization", configuration)
 
 
+            if (file !== undefined) { 
+                localVarFormParams.append('file', file as any);
+            }
+    
+    
+            localVarHeaderParameter['Content-Type'] = 'multipart/form-data';
     
             if (authorization != null) {
                 localVarHeaderParameter['authorization'] = String(authorization);
             }
+            if (cookie != null) {
+                localVarHeaderParameter['cookie'] = String(cookie);
+            }
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = localVarFormParams;
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -396,11 +697,13 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
+         * @summary Get images for the authenticated user
          * @param {string} [authorization] 
+         * @param {string} [cookie] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        imageMeGet: async (authorization?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        imageMeGet: async (authorization?: string, cookie?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/image/me`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -414,13 +717,16 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
             // authentication bearerAuth required
-            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+            await setApiKeyToObject(localVarHeaderParameter, "authorization", configuration)
 
 
     
             if (authorization != null) {
                 localVarHeaderParameter['authorization'] = String(authorization);
             }
+            if (cookie != null) {
+                localVarHeaderParameter['cookie'] = String(cookie);
+            }
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -430,41 +736,243 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
                 options: localVarRequestOptions,
             };
         },
+    }
+};
+
+/**
+ * ImageApi - functional programming interface
+ */
+export const ImageApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = ImageApiAxiosParamCreator(configuration)
+    return {
         /**
          * 
+         * @summary Create an image placeholder (metadata)
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {ImageCreatePostRequest} [body] Image metadata to create
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        rootGet: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerAuth required
-            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
+        async imageCreatePost(authorization?: string, cookie?: string, body?: ImageCreatePostRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.imageCreatePost(authorization, cookie, body, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ImageApi.imageCreatePost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          * 
-         * @param {UserLoginPostRequest} [body] 
+         * @summary Delete an image by ID
+         * @param {string} id Image id
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async imageIdDelete(id: string, authorization?: string, cookie?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.imageIdDelete(id, authorization, cookie, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ImageApi.imageIdDelete']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get image details by ID
+         * @param {string} id Image id
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async imageIdGet(id: string, authorization?: string, cookie?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.imageIdGet(id, authorization, cookie, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ImageApi.imageIdGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Upload binary file for an image ID (multipart)
+         * @param {string} id Image id
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {File} [file] Image file to upload
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async imageIdUploadPost(id: string, authorization?: string, cookie?: string, file?: File, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.imageIdUploadPost(id, authorization, cookie, file, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ImageApi.imageIdUploadPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get images for the authenticated user
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async imageMeGet(authorization?: string, cookie?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.imageMeGet(authorization, cookie, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ImageApi.imageMeGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * ImageApi - factory interface
+ */
+export const ImageApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = ImageApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary Create an image placeholder (metadata)
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {ImageCreatePostRequest} [body] Image metadata to create
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        imageCreatePost(authorization?: string, cookie?: string, body?: ImageCreatePostRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.imageCreatePost(authorization, cookie, body, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Delete an image by ID
+         * @param {string} id Image id
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        imageIdDelete(id: string, authorization?: string, cookie?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.imageIdDelete(id, authorization, cookie, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get image details by ID
+         * @param {string} id Image id
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        imageIdGet(id: string, authorization?: string, cookie?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.imageIdGet(id, authorization, cookie, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Upload binary file for an image ID (multipart)
+         * @param {string} id Image id
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {File} [file] Image file to upload
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        imageIdUploadPost(id: string, authorization?: string, cookie?: string, file?: File, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.imageIdUploadPost(id, authorization, cookie, file, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get images for the authenticated user
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        imageMeGet(authorization?: string, cookie?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.imageMeGet(authorization, cookie, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * ImageApi - object-oriented interface
+ */
+export class ImageApi extends BaseAPI {
+    /**
+     * 
+     * @summary Create an image placeholder (metadata)
+     * @param {string} [authorization] 
+     * @param {string} [cookie] 
+     * @param {ImageCreatePostRequest} [body] Image metadata to create
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public imageCreatePost(authorization?: string, cookie?: string, body?: ImageCreatePostRequest, options?: RawAxiosRequestConfig) {
+        return ImageApiFp(this.configuration).imageCreatePost(authorization, cookie, body, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Delete an image by ID
+     * @param {string} id Image id
+     * @param {string} [authorization] 
+     * @param {string} [cookie] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public imageIdDelete(id: string, authorization?: string, cookie?: string, options?: RawAxiosRequestConfig) {
+        return ImageApiFp(this.configuration).imageIdDelete(id, authorization, cookie, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get image details by ID
+     * @param {string} id Image id
+     * @param {string} [authorization] 
+     * @param {string} [cookie] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public imageIdGet(id: string, authorization?: string, cookie?: string, options?: RawAxiosRequestConfig) {
+        return ImageApiFp(this.configuration).imageIdGet(id, authorization, cookie, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Upload binary file for an image ID (multipart)
+     * @param {string} id Image id
+     * @param {string} [authorization] 
+     * @param {string} [cookie] 
+     * @param {File} [file] Image file to upload
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public imageIdUploadPost(id: string, authorization?: string, cookie?: string, file?: File, options?: RawAxiosRequestConfig) {
+        return ImageApiFp(this.configuration).imageIdUploadPost(id, authorization, cookie, file, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get images for the authenticated user
+     * @param {string} [authorization] 
+     * @param {string} [cookie] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public imageMeGet(authorization?: string, cookie?: string, options?: RawAxiosRequestConfig) {
+        return ImageApiFp(this.configuration).imageMeGet(authorization, cookie, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * UserApi - axios parameter creator
+ */
+export const UserApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Authenticate user and return JWT
+         * @param {UserLoginPostRequest} [body] Login payload
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -482,7 +990,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
             // authentication bearerAuth required
-            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+            await setApiKeyToObject(localVarHeaderParameter, "authorization", configuration)
 
 
     
@@ -500,7 +1008,82 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @param {UserRegisterPostRequest} [body] 
+         * @summary Logout user by clearing the authentication cookie
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        userLogoutPost: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/user/logout`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            await setApiKeyToObject(localVarHeaderParameter, "authorization", configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get current authenticated user details
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        userMeGet: async (authorization?: string, cookie?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/user/me`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            await setApiKeyToObject(localVarHeaderParameter, "authorization", configuration)
+
+
+    
+            if (authorization != null) {
+                localVarHeaderParameter['authorization'] = String(authorization);
+            }
+            if (cookie != null) {
+                localVarHeaderParameter['cookie'] = String(cookie);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Register a new user
+         * @param {UserRegisterPostRequest} [body] User registration payload
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -518,7 +1101,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
             // authentication bearerAuth required
-            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+            await setApiKeyToObject(localVarHeaderParameter, "authorization", configuration)
 
 
     
@@ -538,288 +1121,76 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 };
 
 /**
- * DefaultApi - functional programming interface
+ * UserApi - functional programming interface
  */
-export const DefaultApiFp = function(configuration?: Configuration) {
-    const localVarAxiosParamCreator = DefaultApiAxiosParamCreator(configuration)
+export const UserApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = UserApiAxiosParamCreator(configuration)
     return {
         /**
          * 
-         * @param {string} [authorization] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async collectionGet(authorization?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.collectionGet(authorization, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['DefaultApi.collectionGet']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {string} [authorization] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async collectionIdDelete(id: string, authorization?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.collectionIdDelete(id, authorization, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['DefaultApi.collectionIdDelete']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {string} [authorization] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async collectionIdGet(id: string, authorization?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.collectionIdGet(id, authorization, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['DefaultApi.collectionIdGet']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {string} [authorization] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async collectionIdPut(id: string, authorization?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.collectionIdPut(id, authorization, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['DefaultApi.collectionIdPut']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @param {string} [authorization] 
-         * @param {CollectionPostRequest} [body] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async collectionPost(authorization?: string, body?: CollectionPostRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.collectionPost(authorization, body, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['DefaultApi.collectionPost']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async healthGet(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.healthGet(options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['DefaultApi.healthGet']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @param {string} [authorization] 
-         * @param {ImageCreatePostRequest} [body] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async imageCreatePost(authorization?: string, body?: ImageCreatePostRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.imageCreatePost(authorization, body, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['DefaultApi.imageCreatePost']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {string} [authorization] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async imageIdGet(id: string, authorization?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.imageIdGet(id, authorization, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['DefaultApi.imageIdGet']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {string} [authorization] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async imageIdUploadPost(id: string, authorization?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.imageIdUploadPost(id, authorization, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['DefaultApi.imageIdUploadPost']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @param {string} [authorization] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async imageMeGet(authorization?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.imageMeGet(authorization, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['DefaultApi.imageMeGet']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async rootGet(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.rootGet(options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['DefaultApi.rootGet']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @param {UserLoginPostRequest} [body] 
+         * @summary Authenticate user and return JWT
+         * @param {UserLoginPostRequest} [body] Login payload
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
         async userLoginPost(body?: UserLoginPostRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.userLoginPost(body, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['DefaultApi.userLoginPost']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['UserApi.userLoginPost']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          * 
-         * @param {UserRegisterPostRequest} [body] 
+         * @summary Logout user by clearing the authentication cookie
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async userLogoutPost(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.userLogoutPost(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UserApi.userLogoutPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get current authenticated user details
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async userMeGet(authorization?: string, cookie?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.userMeGet(authorization, cookie, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UserApi.userMeGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Register a new user
+         * @param {UserRegisterPostRequest} [body] User registration payload
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
         async userRegisterPost(body?: UserRegisterPostRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.userRegisterPost(body, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['DefaultApi.userRegisterPost']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['UserApi.userRegisterPost']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
 };
 
 /**
- * DefaultApi - factory interface
+ * UserApi - factory interface
  */
-export const DefaultApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = DefaultApiFp(configuration)
+export const UserApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = UserApiFp(configuration)
     return {
         /**
          * 
-         * @param {string} [authorization] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        collectionGet(authorization?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.collectionGet(authorization, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {string} [authorization] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        collectionIdDelete(id: string, authorization?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.collectionIdDelete(id, authorization, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {string} [authorization] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        collectionIdGet(id: string, authorization?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.collectionIdGet(id, authorization, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {string} [authorization] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        collectionIdPut(id: string, authorization?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.collectionIdPut(id, authorization, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @param {string} [authorization] 
-         * @param {CollectionPostRequest} [body] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        collectionPost(authorization?: string, body?: CollectionPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.collectionPost(authorization, body, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        healthGet(options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.healthGet(options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @param {string} [authorization] 
-         * @param {ImageCreatePostRequest} [body] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        imageCreatePost(authorization?: string, body?: ImageCreatePostRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.imageCreatePost(authorization, body, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {string} [authorization] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        imageIdGet(id: string, authorization?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.imageIdGet(id, authorization, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {string} [authorization] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        imageIdUploadPost(id: string, authorization?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.imageIdUploadPost(id, authorization, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @param {string} [authorization] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        imageMeGet(authorization?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.imageMeGet(authorization, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        rootGet(options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.rootGet(options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @param {UserLoginPostRequest} [body] 
+         * @summary Authenticate user and return JWT
+         * @param {UserLoginPostRequest} [body] Login payload
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -828,7 +1199,28 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
         },
         /**
          * 
-         * @param {UserRegisterPostRequest} [body] 
+         * @summary Logout user by clearing the authentication cookie
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        userLogoutPost(options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.userLogoutPost(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get current authenticated user details
+         * @param {string} [authorization] 
+         * @param {string} [cookie] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        userMeGet(authorization?: string, cookie?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.userMeGet(authorization, cookie, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Register a new user
+         * @param {UserRegisterPostRequest} [body] User registration payload
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -839,142 +1231,51 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
 };
 
 /**
- * DefaultApi - object-oriented interface
+ * UserApi - object-oriented interface
  */
-export class DefaultApi extends BaseAPI {
+export class UserApi extends BaseAPI {
     /**
      * 
-     * @param {string} [authorization] 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    public collectionGet(authorization?: string, options?: RawAxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).collectionGet(authorization, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @param {string} id 
-     * @param {string} [authorization] 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    public collectionIdDelete(id: string, authorization?: string, options?: RawAxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).collectionIdDelete(id, authorization, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @param {string} id 
-     * @param {string} [authorization] 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    public collectionIdGet(id: string, authorization?: string, options?: RawAxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).collectionIdGet(id, authorization, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @param {string} id 
-     * @param {string} [authorization] 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    public collectionIdPut(id: string, authorization?: string, options?: RawAxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).collectionIdPut(id, authorization, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @param {string} [authorization] 
-     * @param {CollectionPostRequest} [body] 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    public collectionPost(authorization?: string, body?: CollectionPostRequest, options?: RawAxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).collectionPost(authorization, body, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    public healthGet(options?: RawAxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).healthGet(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @param {string} [authorization] 
-     * @param {ImageCreatePostRequest} [body] 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    public imageCreatePost(authorization?: string, body?: ImageCreatePostRequest, options?: RawAxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).imageCreatePost(authorization, body, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @param {string} id 
-     * @param {string} [authorization] 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    public imageIdGet(id: string, authorization?: string, options?: RawAxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).imageIdGet(id, authorization, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @param {string} id 
-     * @param {string} [authorization] 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    public imageIdUploadPost(id: string, authorization?: string, options?: RawAxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).imageIdUploadPost(id, authorization, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @param {string} [authorization] 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    public imageMeGet(authorization?: string, options?: RawAxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).imageMeGet(authorization, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    public rootGet(options?: RawAxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).rootGet(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @param {UserLoginPostRequest} [body] 
+     * @summary Authenticate user and return JWT
+     * @param {UserLoginPostRequest} [body] Login payload
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     public userLoginPost(body?: UserLoginPostRequest, options?: RawAxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).userLoginPost(body, options).then((request) => request(this.axios, this.basePath));
+        return UserApiFp(this.configuration).userLoginPost(body, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * 
-     * @param {UserRegisterPostRequest} [body] 
+     * @summary Logout user by clearing the authentication cookie
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public userLogoutPost(options?: RawAxiosRequestConfig) {
+        return UserApiFp(this.configuration).userLogoutPost(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get current authenticated user details
+     * @param {string} [authorization] 
+     * @param {string} [cookie] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public userMeGet(authorization?: string, cookie?: string, options?: RawAxiosRequestConfig) {
+        return UserApiFp(this.configuration).userMeGet(authorization, cookie, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Register a new user
+     * @param {UserRegisterPostRequest} [body] User registration payload
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     public userRegisterPost(body?: UserRegisterPostRequest, options?: RawAxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).userRegisterPost(body, options).then((request) => request(this.axios, this.basePath));
+        return UserApiFp(this.configuration).userRegisterPost(body, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
