@@ -8,9 +8,9 @@ import imageRoutes from './routes/imageRoutes';
 import collectionRoutes from './routes/collectionRoutes';
 import platSwagger from "../swagger.json" with { type: "json" };
 import cookieParser from 'cookie-parser';
-
 import swaggerAutogen from "swagger-autogen";
 
+// Swagger documentation generation
 swaggerAutogen()("../swagger.json", ["./src/index.ts"], {
     info: {
         title: "Cloud API",
@@ -36,9 +36,16 @@ swaggerAutogen()("../swagger.json", ["./src/index.ts"], {
 
 
 
+// MongoDB connection
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://admin:password@localhost:27017/platform-cloud?authSource=admin';
+mongoose.connect(MONGODB_URI)
+    .then(() => console.log('Connected to MongoDB'))
+    .catch((error) => console.error('MongoDB connection error:', error));
+
+
+// Express app setup
 const app = express();
 const PORT = process.env.PORT || 3000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://admin:password@localhost:27017/platform-cloud?authSource=admin';
 
 // Cookie parser middleware
 app.use(cookieParser());
@@ -47,11 +54,6 @@ app.use(cookieParser());
 app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:3000'] }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// MongoDB connection
-mongoose.connect(MONGODB_URI)
-    .then(() => console.log('Connected to MongoDB'))
-    .catch((error) => console.error('MongoDB connection error:', error));
 
 // Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(platSwagger));
