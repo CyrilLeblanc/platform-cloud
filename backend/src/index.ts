@@ -6,8 +6,35 @@ import mongoose from 'mongoose';
 import userRoutes from './routes/userRoutes';
 import imageRoutes from './routes/imageRoutes';
 import collectionRoutes from './routes/collectionRoutes';
-import platSwagger from "./swagger/platformcloud.json" with { type: "json" };
+import platSwagger from "../swagger.json" with { type: "json" };
 import cookieParser from 'cookie-parser';
+
+import swaggerAutogen from "swagger-autogen";
+
+swaggerAutogen()("../swagger.json", ["./src/index.ts"], {
+    info: {
+        title: "Cloud API",
+        description: "API",
+        version: "1.0.0",
+    },
+    host: "localhost:3000",
+    schemes: ["http"],
+    securityDefinitions: {
+        bearerAuth: {
+            type: "apiKey",
+            in: "header",
+            name: "authorization",
+            description: "Utilisez le format: Bearer {votre_token_JWT}"
+        },
+    },
+    security: [{
+        bearerAuth: []
+    }]
+}).then(() => {
+    console.log("Documentation Swagger générée avec succès !");
+});
+
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;

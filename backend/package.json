@@ -8,9 +8,8 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "nodemon --exec tsx src/index.ts",
+    "dev": "nodemon -i swagger.json --exec tsx src/index.ts",
     "start": "node dist/index.js",
-    "swagger": "tsx swagger.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
