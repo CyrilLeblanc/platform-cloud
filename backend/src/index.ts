@@ -5,7 +5,7 @@ import path from 'path';
 import mongoose from 'mongoose';
 import userRoutes from './routes/userRoutes';
 import imageRoutes from './routes/imageRoutes';
-import collectionRoutes from './routes/collectionRoutes';
+import albumRoutes from './routes/albumRoutes';
 import { getMongoConnectionString } from './config/azure';
 import { initBlobStorage } from './services/blobStorage';
 import 'dotenv/config';
@@ -80,7 +80,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(platSwagger));
 // Routes
 app.use('/user', userRoutes);
 app.use('/image', imageRoutes);
-app.use('/collection', collectionRoutes);
+app.use('/album', albumRoutes);
 
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));

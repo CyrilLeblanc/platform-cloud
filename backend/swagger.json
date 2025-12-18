@@ -189,6 +189,10 @@
                 "title": {
                   "type": "string",
                   "example": "My photo title"
+                },
+                "album_id": {
+                  "type": "string",
+                  "example": "1"
                 }
               }
             }
@@ -387,12 +391,12 @@
         }
       }
     },
-    "/collection/": {
+    "/album/": {
       "post": {
         "tags": [
-          "Collection"
+          "Album"
         ],
-        "summary": "Create a new collection",
+        "summary": "Create a new album",
         "description": "",
         "parameters": [
           {
@@ -408,13 +412,13 @@
           {
             "name": "body",
             "in": "body",
-            "description": "Collection payload",
+            "description": "Album payload",
             "schema": {
               "type": "object",
               "properties": {
                 "name": {
                   "type": "string",
-                  "example": "My collection"
+                  "example": "My album"
                 },
                 "description": {
                   "type": "string",
@@ -445,9 +449,9 @@
       },
       "get": {
         "tags": [
-          "Collection"
+          "Album"
         ],
-        "summary": "List collections visible to the caller",
+        "summary": "List albums visible to the caller",
         "description": "",
         "parameters": [
           {
@@ -474,12 +478,12 @@
         }
       }
     },
-    "/collection/{id}": {
+    "/album/{id}": {
       "get": {
         "tags": [
-          "Collection"
+          "Album"
         ],
-        "summary": "Get a collection by its numeric ID",
+        "summary": "Get a album by its numeric ID",
         "description": "",
         "parameters": [
           {
@@ -487,7 +491,7 @@
             "in": "path",
             "required": true,
             "type": "integer",
-            "description": "Collection id",
+            "description": "Album id",
             "example": 1
           },
           {
@@ -521,9 +525,9 @@
       },
       "put": {
         "tags": [
-          "Collection"
+          "Album"
         ],
-        "summary": "Update a collection by ID",
+        "summary": "Update a album by ID",
         "description": "",
         "parameters": [
           {
@@ -531,7 +535,7 @@
             "in": "path",
             "required": true,
             "type": "integer",
-            "description": "Collection id",
+            "description": "Album id",
             "example": 1
           },
           {
@@ -547,13 +551,13 @@
           {
             "name": "body",
             "in": "body",
-            "description": "Collection payload",
+            "description": "Album payload",
             "schema": {
               "type": "object",
               "properties": {
                 "name": {
                   "type": "string",
-                  "example": "My collection"
+                  "example": "My album"
                 },
                 "description": {
                   "type": "string",
@@ -587,9 +591,9 @@
       },
       "delete": {
         "tags": [
-          "Collection"
+          "Album"
         ],
-        "summary": "Delete a collection by ID",
+        "summary": "Delete a album by ID",
         "description": "",
         "parameters": [
           {
@@ -597,7 +601,7 @@
             "in": "path",
             "required": true,
             "type": "integer",
-            "description": "Collection id",
+            "description": "Album id",
             "example": 1
           },
           {

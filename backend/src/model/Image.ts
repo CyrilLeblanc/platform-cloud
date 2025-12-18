@@ -8,6 +8,7 @@ export interface ImageDocument extends Document {
     created_at: Date;
     shot_date: Date;
     user: mongoose.Types.ObjectId;
+    album: mongoose.Types.ObjectId;
     blob_name?: string; // Nom du blob dans Azure Storage
     blob_url?: string;  // URL du blob dans Azure Storage
 }
@@ -20,6 +21,7 @@ const ImageSchema: Schema<ImageDocument> = new Schema(
         mime_type: { type: String, required: true },
         shot_date: { type: Date, required: true },
         user: { type: Schema.Types.ObjectId, ref: 'User',  required: true },
+        album: { type: Schema.Types.ObjectId, ref: 'Album', default: null },
         blob_name: { type: String },
         blob_url: { type: String }
     },
