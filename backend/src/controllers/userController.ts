@@ -35,13 +35,8 @@ export const register = async (req: AuthRequest, res: Response) => {
         // Hash password
         const hashed_password = await argon2.hash(password);
 
-        // Generate unique ID
-        const lastUser = await UserModel.findOne().sort({ id: -1 });
-        const newId = lastUser ? lastUser.id + 1 : 1;
-
         // Create user
         const user = new UserModel({
-            id: newId,
             username,
             email,
             hashed_password,
@@ -126,7 +121,7 @@ export const login = async (req: AuthRequest, res: Response) => {
             success: true,
             result: 'Authenticated',
             user: {
-                id: user.id,
+                id: user._id,
                 username: user.username,
                 email: user.email,
                 isActive: user.isActive
@@ -180,7 +175,7 @@ export const me = async (req: AuthRequest, res: Response) => {
         return res.status(200).json({
             success: true,
             user: {
-                id: user.id,
+                id: user._id,
                 username: user.username,
                 email: user.email,
                 isActive: user.isActive

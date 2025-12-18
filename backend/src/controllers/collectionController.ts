@@ -3,7 +3,6 @@ import CollectionModel from '../model/Collection';
 
 // Typed payloads pour plus de clarté
 interface CreateCollectionBody {
-    id?: number; // optionnel, on peut autogénérer
     name: string;
     description?: string;
 }
@@ -77,12 +76,12 @@ export const getCollectionById = async (req: Request, res: Response) => {
      */
 
     try {
-        const numericId = Number(req.params.id);
-        if (Number.isNaN(numericId)) {
+        const { id } = req.params;
+        if (Number.isNaN(id)) {
             return res.status(400).json({ message: 'Invalid collection id' });
         }
 
-        const collection = await CollectionModel.findOne({ id: numericId }).lean();
+        const collection = await CollectionModel.findOne({ _id: id }).lean();
         if (!collection) {
             return res.status(404).json({ message: 'Collection not found' });
         }
@@ -116,8 +115,8 @@ export const updateCollection = async (
         }
     */
     try {
-        const numericId = Number(req.params.id);
-        if (Number.isNaN(numericId)) {
+        const { id } = req.params;
+        if (Number.isNaN(id)) {
             return res.status(400).json({ message: 'Invalid collection id' });
         }
 
@@ -127,7 +126,7 @@ export const updateCollection = async (
         if (typeof req.body.color === 'string') updatePayload.color = req.body.color;
 
         const updated = await CollectionModel.findOneAndUpdate(
-            { id: numericId },
+            { _id: id },
             { $set: updatePayload },
             { new: true }
         );
@@ -152,12 +151,12 @@ export const deleteCollection = async (req: Request, res: Response) => {
      */
 
     try {
-        const numericId = Number(req.params.id);
-        if (Number.isNaN(numericId)) {
+        const { id } = req.params;
+        if (Number.isNaN(id)) {
             return res.status(400).json({ message: 'Invalid collection id' });
         }
 
-        const deleted = await CollectionModel.findOneAndDelete({ id: numericId });
+        const deleted = await CollectionModel.findOneAndDelete({ _id: id });
         if (!deleted) {
             return res.status(404).json({ message: 'Collection not found' });
         }

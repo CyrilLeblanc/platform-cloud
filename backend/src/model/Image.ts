@@ -1,7 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface ImageDocument extends Document {
-    id: number;
     filename: string;
     title?: string;
     description?: string;
@@ -13,7 +12,6 @@ export interface ImageDocument extends Document {
 
 const ImageSchema: Schema<ImageDocument> = new Schema(
     {
-        id: { type: Number, required: true, unique: true },
         filename: { type: String, required: true },
         title: { type: String },
         description: { type: String },
