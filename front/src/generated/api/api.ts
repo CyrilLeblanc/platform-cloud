@@ -92,13 +92,13 @@ export const AlbumApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * 
          * @summary Delete a album by ID
-         * @param {number} id Album id
+         * @param {string} id Album id
          * @param {string} [authorization] 
          * @param {string} [cookie] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        albumIdDelete: async (id: number, authorization?: string, cookie?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        albumIdDelete: async (id: string, authorization?: string, cookie?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
             assertParamExists('albumIdDelete', 'id', id)
             const localVarPath = `/album/{id}`
@@ -299,13 +299,13 @@ export const AlbumApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @summary Delete a album by ID
-         * @param {number} id Album id
+         * @param {string} id Album id
          * @param {string} [authorization] 
          * @param {string} [cookie] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async albumIdDelete(id: number, authorization?: string, cookie?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async albumIdDelete(id: string, authorization?: string, cookie?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.albumIdDelete(id, authorization, cookie, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AlbumApi.albumIdDelete']?.[localVarOperationServerIndex]?.url;
@@ -380,13 +380,13 @@ export const AlbumApiFactory = function (configuration?: Configuration, basePath
         /**
          * 
          * @summary Delete a album by ID
-         * @param {number} id Album id
+         * @param {string} id Album id
          * @param {string} [authorization] 
          * @param {string} [cookie] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        albumIdDelete(id: number, authorization?: string, cookie?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+        albumIdDelete(id: string, authorization?: string, cookie?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.albumIdDelete(id, authorization, cookie, options).then((request) => request(axios, basePath));
         },
         /**

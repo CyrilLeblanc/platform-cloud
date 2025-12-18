@@ -49,8 +49,12 @@ function uploadImage(id: string, file: File) {
     return getApi().imageIdUploadPost(id, undefined, undefined, file);
 }
 
-function createImage(title: string, description: string, url: string, collectionId?: string) {
-    return getApi().imageCreatePost(undefined, { title, description, url, collectionId } as any);
+function createImage(title: string, description: string, album_id?: string) {
+    return getApi().imageCreatePost(undefined, undefined, { title, description, album_id } as any);
+}
+
+function getImagesMe() {
+    return getApi().imageMeGet();
 }
 
 function getImageById(id: string) {
@@ -58,7 +62,7 @@ function getImageById(id: string) {
 }
 
 function deleteImage(id: string) {
-    return (getApi() as any).imageIdDelete(id);
+    return getApi().imageIdDelete(id);
 }
 
 function getMyImages() {
@@ -74,7 +78,7 @@ function getCollectionById(id: string) {
 }
 
 function deleteCollectionById(id: string) {
-    return getApi().albumIdDelete(parseInt(id));
+    return getApi().albumIdDelete(id);
 }
 
 function putCollectionById(id: string, name: string, color: string) {
@@ -97,5 +101,6 @@ export {
     getCollectionById,
     deleteCollectionById,
     putCollectionById,
-    createCollection
+    createCollection,
+    getImagesMe
 };

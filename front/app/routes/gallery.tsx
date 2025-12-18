@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router'
 import { useAuth } from '../context/AuthContext'
-import { createCollection, listCollections, deleteCollectionById } from "src/wrapper/wrapper";
+import { createCollection, listCollections, deleteCollectionById, getImagesMe, createImage, uploadImage, deleteImage } from "src/wrapper/wrapper";
 
 type Collection = {
   id: string;
@@ -14,7 +14,7 @@ type ImageItem = {
   src: string;
   title: string;
   description: string;
-  collectionId: string | null;
+  album_id: string | null;
 };
 
 export function meta() {
@@ -61,6 +61,34 @@ function Gallery() {
   ];
 
   useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      try {
+        const res: any = await getImagesMe();
+        if (!mounted) return;
+
+        const payload = res?.data ?? res;
+        const mapped: ImageItem[] = payload.map((img: any) => ({
+          id: img._id ?? img.id,
+          src: img.url, 
+          title: img.title ?? "",
+          description: img.description ?? "",
+          album_id: img.album ?? null,
+        }));
+
+        setImages(mapped);
+      } catch (err) {
+        console.error("listImages error", err);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [selectedCollectionId]);
+
+  useEffect(() => {
     try {
       const raw = localStorage.getItem("gallery:images");
       const rawColls = localStorage.getItem("gallery:collections");
@@ -77,7 +105,6 @@ function Gallery() {
     (async () => {
       try {
         const res: any = await listCollections();
-        console.log("listCollections response:", res);
         if (!mounted) return;
         const payload = res && typeof res === "object" && "data" in res ? res.data : res;
         if (Array.isArray(payload)) {
@@ -174,87 +201,6 @@ function Gallery() {
     const nameWithoutExt = filename.replace(/\.[^.]+$/, "");
 
     return nameWithoutExt.replace(/[^a-zA-Z0-9\s._-]/g, "_").slice(0, 100); 
-  }
-
-  async function handleFiles(files: FileList | null) {
-    if (!files) return;
-
-    const validFiles: File[] = [];
-    const errors: string[] = [];
-
-    // Validation de base (extension, type MIME, taille)
-    for (const file of Array.from(files)) {
-      const validation = validateFile(file);
-      if (!validation.valid) {
-        errors.push(`${file.name}: ${validation.error}`);
-      } else {
-        validFiles.push(file);
-      }
-    }
-
-    if (errors.length > 0) {
-      alert(`⚠️ Fichiers rejetés:\n\n${errors.join("\n")}`);
-    }
-
-    if (validFiles.length === 0) return;
-
-    // Validation du contenu image
-    const contentValidation = await Promise.all(
-      validFiles.map(async (file) => ({
-        file,
-        valid: await validateImageContent(file),
-      }))
-    );
-
-    const validImageFiles = contentValidation
-      .filter((v) => v.valid)
-      .map((v) => v.file);
-
-    const invalidImages = contentValidation
-      .filter((v) => !v.valid)
-      .map((v) => v.file.name);
-
-    if (invalidImages.length > 0) {
-      alert(
-        `⚠️ Images invalides ou corrompues:\n\n${invalidImages.join("\n")}`
-      );
-    }
-
-    if (validImageFiles.length === 0) return;
-
-    // Lecture des fichiers valides
-    const readers: Promise<ImageItem>[] = validImageFiles.map(
-      (file) =>
-        new Promise((res, rej) => {
-          const fr = new FileReader();
-          fr.onload = () => {
-            res({
-              id: makeId(),
-              src: String(fr.result),
-              title: sanitizeFilename(file.name),
-              description: "",
-              collectionId: selectedCollectionId,
-            });
-          };
-          fr.onerror = () => rej(new Error("Erreur de lecture"));
-          fr.readAsDataURL(file);
-        })
-    );
-
-    try {
-      const items = await Promise.all(readers);
-      setImages((prev) => [...items, ...prev]);
-
-      // Message de succès
-      if (validImageFiles.length > 0) {
-        console.log(
-          `✅ ${validImageFiles.length} image(s) ajoutée(s) avec succès`
-        );
-      }
-    } catch (err) {
-      console.error(err);
-      alert("❌ Erreur lors du chargement des images");
-    }
   }
 
   function onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -369,7 +315,11 @@ function Gallery() {
 
   function getFilteredImages() {
     if (selectedCollectionId === null) return images;
-    return images.filter((img) => img.collectionId === selectedCollectionId);
+
+    const imagesres = images.filter(
+      (img) => String(img.album_id) === String(selectedCollectionId)
+    );
+    return imagesres;
   }
 
   function moveImageToCollection(imgIdx: number, collId: string | null) {
@@ -380,11 +330,67 @@ function Gallery() {
     );
   }
 
+  async function handleFiles(files: FileList | null) {
+    if (!files) return;
+
+    for (const file of Array.from(files)) {
+      const validation = validateFile(file);
+      if (!validation.valid) {
+        alert(validation.error);
+        continue;
+      }
+
+      try {
+        // 1️⃣ create image metadata (JSON ONLY)
+        const createRes = await createImage(file.name, "azda", selectedCollectionId || undefined);
+
+        const imageId = createRes.data.content.id;
+        await uploadImage(imageId, file);
+
+        // 3️⃣ optimistic UI (reconstruction locale)
+        const localUrl = URL.createObjectURL(file);
+
+        setImages((prev) => [
+          {
+            id: imageId,
+            src: localUrl,
+            title: file.name,
+            description: "azda",
+            collectionId: selectedCollectionId,
+            uploading: false,
+          },
+          ...prev,
+        ]);
+      } catch (err) {
+        console.error("Upload failed:", err);
+        alert("Erreur lors de l’upload de l’image");
+      }
+    }
+  }
+
+  async function deleteImageById(imageId: string) {
+    try {
+      await deleteImage(imageId);
+      setImages((prev) => prev.filter((img) => img.id !== imageId));
+      if (selectedIndex !== null) {
+        const idx = images.findIndex((img) => img.id === imageId);
+        if (idx === selectedIndex) {
+          setSelectedIndex(null);
+        } else if (idx < selectedIndex) {
+          setSelectedIndex((s) => (s ? s - 1 : null));
+        }
+      }
+    } catch (err) {
+      console.error("deleteImage error", err);
+      alert("Erreur lors de la suppression de l’image sur le serveur");
+    }
+  }
+
   return (
     <div className="flex min-h-screen bg-white">
       {/* Sidebar Collections */}
       <aside className="w-64 bg-slate-800 text-white p-4 overflow-y-auto max-h-screen">
-        <h2 className="text-lg font-semibold mb-4">Collections</h2>
+        <h2 className="text-lg font-semibold mb-4">Albums</h2>
 
         {/* All images */}
         <button
@@ -419,7 +425,7 @@ function Gallery() {
                   style={{ backgroundColor: coll.color }}
                 />
                 <span className="flex-1 text-sm truncate">{coll.name}</span>
-                <span className="text-xs text-slate-300">({count})</span>
+                {/* <span className="text-xs text-slate-300">({count})</span> */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -439,7 +445,7 @@ function Gallery() {
           onClick={() => setShowNewCollection(true)}
           className="w-full px-3 py-2 text-sm bg-slate-700 rounded-md hover:bg-slate-600 transition"
         >
-          + Nouvelle collection
+          + Nouvel album
         </button>
 
         {/* New collection form */}
@@ -545,6 +551,7 @@ function Gallery() {
                     onClick={(e) => {
                       e.stopPropagation();
                       removeAt(absoluteIdx);
+                      deleteImageById(item.id);
                     }}
                     title="Supprimer"
                     className="absolute top-1 right-1 bg-black/60 text-white rounded-full w-8 h-8 flex items-center justify-center z-10 hover:bg-black/80"
@@ -579,6 +586,7 @@ function Gallery() {
                   <button
                     onClick={() => {
                       removeAt(selectedIndex);
+                      deleteImageById(images[selectedIndex].id);
                     }}
                     className="text-sm text-red-600 hover:text-red-700"
                   >
@@ -597,36 +605,30 @@ function Gallery() {
                 <label className="block text-xs text-slate-600 mb-1">
                   Titre
                 </label>
-                <input
+                {/* <input
                   className="w-full px-2 py-1 border border-slate-300 rounded bg-white text-slate-900"
                   value={images[selectedIndex].title}
                   onChange={(e) =>
                     updateSelected((it) => ({ ...it, title: e.target.value }))
                   }
-                />
+                /> */}
+                <p>
+                  { images[selectedIndex].title }
+                </p>
               </div>
 
               <div className="mb-3">
                 <label className="block text-xs text-slate-600 mb-1">
                   Description
                 </label>
-                <textarea
-                  className="w-full px-2 py-1 border border-slate-300 rounded bg-white text-slate-900 h-32"
-                  value={images[selectedIndex].description}
-                  onChange={(e) =>
-                    updateSelected((it) => ({
-                      ...it,
-                      description: e.target.value,
-                    }))
-                  }
-                />
+                <p> { images[selectedIndex].description } </p>
               </div>
 
               <div className="mb-3">
                 <label className="block text-xs text-slate-600 mb-1">
-                  Collection
+                  Album
                 </label>
-                <select
+                {/* <select
                   className="w-full px-2 py-1 border border-slate-300 rounded bg-white text-slate-900 text-sm"
                   value={images[selectedIndex].collectionId || ""}
                   onChange={(e) =>
@@ -642,12 +644,20 @@ function Gallery() {
                       {c.name}
                     </option>
                   ))}
-                </select>
+                </select> */}
+                <p>
+                  {(() => {
+                    const coll = collections.find(
+                      (c) => c.id === images[selectedIndex].collectionId
+                    );
+                    return coll ? coll.name : "Aucun album";
+                  })()}
+                </p>
               </div>
 
-              <div className="text-sm text-slate-500">
+              {/* <div className="text-sm text-slate-500">
                 Appuyez sur "Fermer" pour enregistrer.
-              </div>
+              </div> */}
             </aside>
           </div>
         </div>
