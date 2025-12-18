@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import AlbumModel from '../model/Album';
 import { AuthRequest } from '../middleware/auth';
 import ImageModel from '../model/Image';
+import { AlbumDocument } from '../model/Album';
 
 // Typed payloads pour plus de clarté
 interface CreateAlbumBody {
@@ -53,7 +54,12 @@ export const createAlbum = async (req: AuthRequest, res: Response) => {
             description: album.description,
             color: album.color,
             created_at: album.created_at,
-            images: ImageModel.find({ album: album._id }).lean()
+            images: (await ImageModel.find({ album: album._id })).map(img => ({
+                id: img._id,
+                title: img.title,
+                description: img.description,
+                url: img.blob_url,
+            }))
         });
     } catch (error) {
         console.error('Error creating album', error);
@@ -74,7 +80,15 @@ export const getMyAlbums = async (req: AuthRequest, res: Response) => {
         
     try {
         const albums = await AlbumModel.find({user: req.user._id}).sort({ created_at: -1 }).lean();
-        return res.status(200).json(albums);
+        const result = await Promise.all(albums.map(async (album: AlbumDocument) => ({
+            id: album._id,
+            name: album.name,
+            description: album.description,
+            color: album.color,
+            created_at: album.created_at,
+        })));
+
+        return res.status(200).json(result);
     } catch (error) {
         console.error('Error fetching albums', error);
         return res.status(500).json({ message: 'Internal server error' });
@@ -90,8 +104,8 @@ export const getAlbumById = async (req: AuthRequest, res: Response) => {
             in: 'path',
             description: 'Album id',
             required: true,
-            type: 'integer',
-            example: 1
+            type: 'string',
+            example: '1'
         }
      */
 
@@ -116,6 +130,12 @@ export const getAlbumById = async (req: AuthRequest, res: Response) => {
             description: album.description,
             color: album.color,
             created_at: album.created_at,
+            images: (await ImageModel.find({ album: album._id })).map(img => ({
+                id: img._id,
+                title: img.title,
+                description: img.description,
+                url: img.blob_url,
+            }))
         });
     } catch (error) {
         console.error('Error fetching album', error);
@@ -135,8 +155,8 @@ export const updateAlbum = async (
             in: 'path',
             description: 'Album id',
             required: true,
-            type: 'integer',
-            example: 1
+            type: 'string',
+            example: '1'
         }
         #swagger.parameters['body'] = {
             in: 'body',

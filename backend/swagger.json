@@ -190,6 +190,10 @@
                   "type": "string",
                   "example": "My photo title"
                 },
+                "description": {
+                  "type": "string",
+                  "example": "A simple description"
+                },
                 "album_id": {
                   "type": "string",
                   "example": "1"
@@ -229,9 +233,9 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "text",
+            "type": "string",
             "description": "Image id",
-            "example": 1
+            "example": "1"
           },
           {
             "name": "authorization",
@@ -490,9 +494,9 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "integer",
+            "type": "string",
             "description": "Album id",
-            "example": 1
+            "example": "1"
           },
           {
             "name": "authorization",
@@ -534,9 +538,9 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "integer",
+            "type": "string",
             "description": "Album id",
-            "example": 1
+            "example": "1"
           },
           {
             "name": "authorization",
