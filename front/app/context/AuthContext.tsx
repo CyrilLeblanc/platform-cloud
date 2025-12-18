@@ -18,7 +18,7 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-const STORAGE_TOKEN_KEY = 'pc_auth_token_v1';
+const STORAGE_TOKEN_KEY = 'pc_token';
 const STORAGE_USER_KEY = 'pc_user_v1';
 
 export const AuthProvider: React.FC<{children: React.ReactNode}> = ({children}) => {
@@ -57,30 +57,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({children}) 
     }
   }, [user]);
 
-  // Optional: on mount, you could validate token with backend
-  useEffect(() => {
-    // Try to fetch current user from backend (/user/me). This supports cookie-based sessions
-    const fetchMe = async () => {
-      try {
-        const base = import.meta.env.VITE_API_BASE_URL ?? ''
-        const url = base.replace(/\/$/, '') + '/user/me'
-        const headers: Record<string, string> = {}
-        if (token) headers['authorization'] = `Bearer ${token}`
-        const res = await fetch(url, { credentials: 'include', headers })
-        if (!res.ok) return
-        const data = await res.json()
-        // data may be { user: {...} } or the user object directly
-        const maybeUser = data?.user ?? data?.result ?? data
-        if (maybeUser && typeof maybeUser === 'object') {
-          setUser(maybeUser)
-        }
-      } catch (e) {
-        // ignore errors silently
-      }
-    }
-
-    fetchMe()
-  }, [])
+  // Token-based auth: no need to hydrate from server since we store user on login
 
   const login = (t: string, u?: User) => {
     setToken(t);

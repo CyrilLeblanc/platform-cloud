@@ -44,8 +44,10 @@ export const createCollection = async (req: AuthRequest, res: Response) => {
             color: color,
             name,
             description,
-            user: user
+            user: user._id
         });
+
+        const images = await ImageModel.find({ collection: collection._id }).lean();
 
         return res.status(201).json({
             id: collection._id,
@@ -53,7 +55,7 @@ export const createCollection = async (req: AuthRequest, res: Response) => {
             description: collection.description,
             color: collection.color,
             created_at: collection.created_at,
-            images: ImageModel.find({ collection: collection._id }).lean()
+            images: images
         });
     } catch (error) {
         console.error('Error creating collection', error);

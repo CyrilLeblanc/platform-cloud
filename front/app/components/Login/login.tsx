@@ -23,6 +23,7 @@ export default function LoginForm() {
 
 	// call login endpoint and return parsed data
 	const handleLogin = async (email: string, password: string) => {
+		console.log(email, password);
 		const result = await API.loginUser(email, password)
 		const data = (result as any)?.data ?? (result as any)
 		return data

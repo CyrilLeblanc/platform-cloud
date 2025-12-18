@@ -1,41 +1,49 @@
 import * as API from '../generated/api';
 
-let DefaultApi = new API.DefaultApi();
+function getApi() {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('pc_token') : null;
+    const cfg = new API.Configuration({ basePath: (import.meta.env.VITE_API_BASE_URL as string) ?? undefined, baseOptions: { headers: token ? { authorization: `Bearer ${token}` } : {} } });
+    return new API.DefaultApi(cfg);
+}
 
 function registerUser(username: string, password: string, email: string) {
-    return DefaultApi.userRegisterPost({ username, password, email } as any);
+    return getApi().userRegisterPost({ username, password, email } as any);
 }
 
 function loginUser(email: string, password: string) {
-    return DefaultApi.userLoginPost({ email, password } as any);
+    return getApi().userLoginPost({ email, password } as any);
 }
 
 function createImage(title: string, description: string, url: string, collectionId?: string) {
-    return DefaultApi.imageCreatePost({ title, description, url, collectionId } as any);
+    return getApi().imageCreatePost(undefined, { title, description, url, collectionId } as any);
 }
 
 function getImageById(id: string) {
-    return DefaultApi.imageIdGet(id);
+    return getApi().imageIdGet(id);
 }
 
 function getMyImages() {
-    return DefaultApi.imageMeGet();
+    return getApi().imageMeGet();
+}
+
+function listCollections() {
+    return getApi().collectionGet();
 }
 
 function getCollectionById(id: string) {
-    return DefaultApi.collectionIdGet(id);
+    return getApi().collectionIdGet(id);
 }
 
 function deleteCollectionById(id: string) {
-    return DefaultApi.collectionIdDelete(id);
+    return getApi().collectionIdDelete(id);
 }
 
 function putCollectionById(id: string, name: string, color: string) {
-    return DefaultApi.collectionIdPut(id, { name, color } as any);
+    return getApi().collectionIdPut(id, undefined, { name, color } as any);
 }
 
 function createCollection(name: string, color: string) {
-    return DefaultApi.collectionPost({ name, color } as any);
+    return getApi().collectionPost(undefined, {name, color} as any);
 }
 
 export {
@@ -43,6 +51,7 @@ export {
     loginUser,
     createImage,
     getImageById,
+    listCollections,
     getMyImages,
     getCollectionById,
     deleteCollectionById,

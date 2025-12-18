@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Navigate } from 'react-router'
+import { useNavigate } from 'react-router'
 import { useAuth } from '../context/AuthContext'
+import { createCollection, listCollections, deleteCollectionById } from "src/wrapper/wrapper";
 
 type Collection = {
   id: string;
@@ -68,6 +69,33 @@ function Gallery() {
     } catch (err) {
       console.error(err);
     }
+  }, []);
+
+  // Récupère les collections côté serveur (si l'utilisateur est connecté)
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res: any = await listCollections();
+        if (!mounted) return;
+        const payload = res && typeof res === "object" && "data" in res ? res.data : res;
+        if (Array.isArray(payload)) {
+          const mapped = payload.map((c: any) => ({
+            id: c._id ?? c.id ?? String(c._id),
+            name: c.name ?? "Collection",
+            color: c.color ?? "#3B82F6",
+          }));
+          setCollections(mapped);
+        }
+      } catch (err) {
+        // Pas bloquant — on conserve le fallback localStorage
+        console.debug("listCollections error:", err);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -272,27 +300,63 @@ function Gallery() {
     return s.length > n ? s.slice(0, n) + "…" : s;
   }
 
-  function createCollection() {
+  async function createCollectionbis() {
     if (!newCollName.trim()) return;
-    const coll: Collection = {
-      id: makeId(),
-      name: newCollName,
-      color: newCollColor,
-    };
-    setCollections((prev) => [...prev, coll]);
-    setNewCollName("");
-    setNewCollColor("#3B82F6");
-    setShowNewCollection(false);
+    try {
+      const res: any = await createCollection(newCollName, newCollColor);
+      const payload = res && typeof res === "object" && "data" in res ? res.data : res;
+      // si le serveur renvoie l'objet créé
+      const serverId = payload?._id ?? payload?.id;
+      const coll: Collection = {
+        id: serverId ? String(serverId) : makeId(),
+        name: payload?.name ?? newCollName,
+        color: payload?.color ?? newCollColor,
+      };
+      setCollections((prev) => [...prev, coll]);
+      setNewCollName("");
+      setNewCollColor("#3B82F6");
+      setShowNewCollection(false);
+    } catch (err) {
+      console.error(err);
+      // fallback local-only behavior
+      const coll: Collection = {
+        id: makeId(),
+        name: newCollName,
+        color: newCollColor,
+      };
+      setCollections((prev) => [...prev, coll]);
+      setNewCollName("");
+      setNewCollColor("#3B82F6");
+      setShowNewCollection(false);
+    }
   }
 
-  function deleteCollection(collId: string) {
+  async function deleteCollection(collId: string) {
+    // Optimistically remove from UI
+    const prevCollections = collections;
+    const prevImages = images;
     setCollections((prev) => prev.filter((c) => c.id !== collId));
     setImages((prev) =>
-      prev.map((img) =>
-        img.collectionId === collId ? { ...img, collectionId: null } : img
-      )
+      prev.map((img) => (img.collectionId === collId ? { ...img, collectionId: null } : img))
     );
     if (selectedCollectionId === collId) setSelectedCollectionId(null);
+
+    // If the id looks local-only (no server id), skip API call
+    // We attempt to call API; on error we revert or keep local removal depending on status
+    try {
+      await deleteCollectionById(collId);
+    } catch (err: any) {
+      console.error('deleteCollectionById error', err);
+      const status = err?.response?.status ?? err?.status;
+      if (status === 404) {
+        // already gone on server — keep local deletion
+        return;
+      }
+      // revert optimistic change on unexpected error
+      setCollections(prevCollections);
+      setImages(prevImages);
+      alert("Erreur lors de la suppression de la collection sur le serveur");
+    }
   }
 
   function renameCollection(collId: string, newName: string) {
@@ -402,7 +466,7 @@ function Gallery() {
             </div>
             <div className="flex gap-2">
               <button
-                onClick={createCollection}
+                onClick={createCollectionbis}
                 className="flex-1 text-sm px-2 py-1 bg-black text-white rounded hover:bg-gray-900"
               >
                 Créer
@@ -593,6 +657,17 @@ function Gallery() {
 
 export default function GalleryRoute() {
   const auth = useAuth()
-  if (!auth.isAuthenticated) return <Navigate to="/login" replace />
+  const navigate = useNavigate()
+  const [isChecking, setIsChecking] = useState(true)
+
+  useEffect(() => {
+    if (!auth.isAuthenticated) {
+      navigate('/login', { replace: true, state: { from: '/gallery' } })
+    } else {
+      setIsChecking(false)
+    }
+  }, [auth.isAuthenticated, navigate])
+
+  if (isChecking || !auth.isAuthenticated) return null
   return <Gallery />
 }
