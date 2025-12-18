@@ -356,7 +356,7 @@ function Gallery() {
             src: localUrl,
             title: file.name,
             description: "azda",
-            collectionId: selectedCollectionId,
+            album_id: selectedCollectionId,
             uploading: false,
           },
           ...prev,
