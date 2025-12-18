@@ -2,7 +2,8 @@ import React, { useState } from 'react'
 import { DefaultApiFactory } from '../../../src/generated/api/api'
 import { Configuration } from '../../../src/generated/api/configuration'
 import * as API from '../../../src/wrapper/wrapper';
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
+import { useAuth } from '../../context/AuthContext'
 
 type Mode = 'login' | 'register'
 
@@ -16,18 +17,22 @@ export default function LoginForm() {
 	const [error, setError] = useState<string | null>(null)
 	const [success, setSuccess] = useState<string | null>(null)
 	const navigate = useNavigate()
+	const auth = useAuth()
+	const location = useLocation()
+	const from = (location.state as any)?.from ?? '/gallery'
 
+	// call login endpoint and return parsed data
 	const handleLogin = async (email: string, password: string) => {
-		const result = await API.loginUser(email, password);
-		navigate("/gallery", { replace: true })
-		// window.location.href = '/gallery';
-	};
+		const result = await API.loginUser(email, password)
+		const data = (result as any)?.data ?? (result as any)
+		return data
+	}
 
 	const handleRegister = async (name: string, email: string, password: string) => {
-		const result = await API.registerUser(name, password, email);
-		handleLogin(email, password);		
-		navigate("/gallery", { replace: true })
-		// window.location.href = '/gallery';
+		const reg = await API.registerUser(name, password, email)
+		const data = (reg as any)?.data ?? (reg as any)
+		// after register, attempt login
+		return handleLogin(email, password)
 	}
 
 	async function submit(e: React.FormEvent) {
@@ -49,17 +54,25 @@ export default function LoginForm() {
 
 			// Call the appropriate endpoint using the generated client
 			const result = mode === 'login'
-				? handleLogin(email, password)
-				: handleRegister(name, email, password)
+				? await handleLogin(email, password)
+				: await handleRegister(name, email, password)
 
-			// The generated client returns an Axios response. Try to extract token if present.
-			const token = (result as any)?.data?.token || (result as any)?.data?.access_token
+			const data = result
+			// The generated client may return token or user
+			const token = data?.token || data?.access_token || null
+			const user = data?.user ?? data?.result ?? data
+
 			if (token) {
+				auth.login(token, user)
 				localStorage.setItem('pc_token', token)
 				setSuccess('Connecté — token enregistré en localStorage')
-			} else if ((result as any)?.status && (result as any).status >= 200 && (result as any).status < 300) {
-			} else {
+			} else if (user) {
+				auth.setUser(user)
+				setSuccess('Connecté')
 			}
+
+			// redirect to original location
+			navigate(from, { replace: true })
 			// clean sensitive data
 			setPassword('')
 			setConfirm('')

@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { Navigate } from 'react-router'
+import { useAuth } from '../context/AuthContext'
 
 type Collection = {
   id: string;
@@ -21,7 +23,7 @@ export function meta() {
   ];
 }
 
-export default function Gallery() {
+function Gallery() {
   const [images, setImages] = useState<ImageItem[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -415,4 +417,10 @@ export default function Gallery() {
       )}
     </div>
   );
+}
+
+export default function GalleryRoute() {
+  const auth = useAuth()
+  if (!auth.isAuthenticated) return <Navigate to="/login" replace />
+  return <Gallery />
 }

@@ -1,8 +1,13 @@
 import React from 'react'
 import { Link } from 'react-router'
+import { useAuth } from '../../context/AuthContext'
+import { useNavigate } from 'react-router'
 
 export default function Header() {
 	const [open, setOpen] = React.useState(false)
+
+	const { user, isAuthenticated, logout } = useAuth()
+	const navigate = useNavigate()
 
 	return (
 		<header className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white left-0 right-0 z-40 shadow">
@@ -17,7 +22,14 @@ export default function Header() {
 
 					<nav className="hidden md:flex items-center gap-6 text-sm font-medium">
 						<Link to="/gallery" className="hover:text-slate-200">Galerie</Link>
-						<Link to="/login" className="px-3 py-1 border border-transparent rounded bg-white/10 hover:bg-white/20">Se connecter</Link>
+						{isAuthenticated ? (
+							<div className="flex items-center gap-3 pl-6 border-l border-white/20">
+								<div className="text-sm">{user?.username ?? user?.email ?? 'Utilisateur'}</div>
+								<button onClick={() => { logout(); navigate('/login', { replace: true }); }} className="px-3 py-1 border border-transparent rounded bg-red-500/20 hover:bg-red-500/30 cursor-pointer">Se déconnecter</button>
+							</div>
+						) : (
+							<Link to="/login" className="px-3 py-1 border border-transparent rounded bg-white/10 hover:bg-white/20">Se connecter</Link>
+						)}
 					</nav>
 
 					<div className="md:hidden">
