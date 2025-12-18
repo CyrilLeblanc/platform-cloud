@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
+import path from 'path';
 import mongoose from 'mongoose';
 import userRoutes from './routes/userRoutes';
 import imageRoutes from './routes/imageRoutes';
@@ -32,6 +33,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(platSwagger));
 app.use('/user', userRoutes);
 app.use('/image', imageRoutes);
 app.use('/collection', collectionRoutes);
+
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Start server
 app.listen(PORT, () => {
