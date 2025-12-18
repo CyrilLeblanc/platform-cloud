@@ -5,7 +5,10 @@ import path from 'path';
 import mongoose from 'mongoose';
 import userRoutes from './routes/userRoutes';
 import imageRoutes from './routes/imageRoutes';
-import collectionRoutes from './routes/collectionRoutes';
+import albumRoutes from './routes/albumRoutes';
+import { getMongoConnectionString } from './config/azure';
+import { initBlobStorage } from './services/blobStorage';
+import 'dotenv/config';
 import platSwagger from "../swagger.json" with { type: "json" };
 import cookieParser from 'cookie-parser';
 import swaggerAutogen from "swagger-autogen";
@@ -34,16 +37,6 @@ swaggerAutogen()("../swagger.json", ["./src/index.ts"], {
     console.log("Documentation Swagger générée avec succès !");
 });
 
-
-
-// MongoDB connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://admin:password@localhost:27017/platform-cloud?authSource=admin';
-mongoose.connect(MONGODB_URI)
-    .then(() => console.log('Connected to MongoDB'))
-    .catch((error) => console.error('MongoDB connection error:', error));
-
-
-// Express app setup
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -55,13 +48,39 @@ app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:3000'], crede
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Initialisation async des services Azure et MongoDB
+const initializeServices = async () => {
+    try {
+        // Récupérer la connexion MongoDB depuis Key Vault (ou fallback sur env var)
+        const mongoUri = await getMongoConnectionString();
+        await mongoose.connect(mongoUri);
+        console.log('Connected to MongoDB');
+
+        // Initialiser Azure Blob Storage (si configuré)
+        if (process.env.AZURE_STORAGE_CONNECTION_STRING || process.env.AZURE_KEY_VAULT_URL) {
+            try {
+                await initBlobStorage();
+                console.log('Azure Blob Storage initialized');
+            } catch (error) {
+                console.warn('Azure Blob Storage not initialized (falling back to local storage):', error);
+            }
+        }
+    } catch (error) {
+        console.error('Service initialization error:', error);
+        process.exit(1);
+    }
+};
+
+// Initialiser les services
+initializeServices();
+
 // Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(platSwagger));
 
 // Routes
 app.use('/user', userRoutes);
 app.use('/image', imageRoutes);
-app.use('/collection', collectionRoutes);
+app.use('/album', albumRoutes);
 
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));

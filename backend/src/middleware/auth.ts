@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import 'dotenv/config';
 import UserModel, { UserDocument } from '../model/User';
 import { Types } from 'mongoose';
 
