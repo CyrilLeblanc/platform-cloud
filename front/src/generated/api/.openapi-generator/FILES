@@ -1,0 +1,15 @@
+.gitignore
+.npmignore
+api.ts
+base.ts
+common.ts
+configuration.ts
+docs/AlbumApi.md
+docs/AlbumPostRequest.md
+docs/ImageApi.md
+docs/ImageCreatePostRequest.md
+docs/UserApi.md
+docs/UserLoginPostRequest.md
+docs/UserRegisterPostRequest.md
+git_push.sh
+index.ts
