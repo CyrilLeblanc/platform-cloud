@@ -407,9 +407,9 @@ function Gallery() {
         {/* Collections list */}
         <div className="mb-4 space-y-1">
           {collections.map((coll) => {
-            const count = images.filter(
-              (img) => img.collectionId === coll.id
-            ).length;
+            // Compte des images dans cet album
+            const count = images.filter((img) => img.album_id === coll.id).length;
+
             return (
               <div
                 key={coll.id}
@@ -425,7 +425,8 @@ function Gallery() {
                   style={{ backgroundColor: coll.color }}
                 />
                 <span className="flex-1 text-sm truncate">{coll.name}</span>
-                {/* <span className="text-xs text-slate-300">({count})</span> */}
+                {/* Affichage du nombre d’images */}
+                <span className="text-xs text-slate-300">({count})</span>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
